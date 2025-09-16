@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router";
+// import axios from "axios";
 import "../styles/homeStyles.css";
 
 const sections = [
@@ -139,7 +141,10 @@ const sections = [
 const HomePage: React.FC = () => {
   const [activeSection, setActiveSection] = useState("home");
   const [showWelcome, setShowWelcome] = useState(true);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const mainContentRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   // Efecto para el parallax del fondo
   useEffect(() => {
@@ -220,23 +225,35 @@ const HomePage: React.FC = () => {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/");
+    console.log("Usuario ha cerrado sesión");
+  };
+
   const handleButtonClick = (
     e: React.MouseEvent<HTMLDivElement, MouseEvent>,
     sectionId: string
   ) => {
     createRipple(e, e.currentTarget as HTMLElement);
 
+    if (sectionId === "logout") {
+      setShowLogoutModal(true);
+      createParticles(e);
+      return;
+    }
+    
     if (showWelcome) {
       setShowWelcome(false);
     }
-
+    
     setTimeout(() => {
       setActiveSection(sectionId);
     }, 300);
 
     createParticles(e);
   };
-
+  
   return (
     <>
       {/* Animated background elements */}
@@ -258,7 +275,66 @@ const HomePage: React.FC = () => {
             <i>{section.icon}</i>
           </div>
         ))}
+        <div
+          className="sidebar-button"
+          data-section="logout"
+          onClick={(e) => handleButtonClick(e, "logout")}
+        >
+          <i>🚪</i>
+        </div>
       </div>
+      
+      {/* Modal de logout */}
+      {showLogoutModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>¿Desea cerrar sesión?</h3>
+            <div className="flex justify-center mt-[1rem] gap-10">
+              <button
+                className="modal-btn modal-btn-confirm"
+                onClick={() => {
+                  handleLogout();
+                  setShowLogoutModal(false);
+                }}
+              >
+                Sí
+              </button>
+              <button
+                className="modal-btn modal-btn-cancel"
+                onClick={() => setShowLogoutModal(false)}
+              >
+                No
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Nuevo modal de inicio de sesión */}
+      {showLoginModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>¿Desea iniciar sesión?</h3>
+            <div style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}>
+              <button
+                className="modal-btn modal-btn-confirm"
+                onClick={() => {
+                  console.log("Iniciar sesión...");
+                  setShowLoginModal(false);
+                }}
+              >
+                Aceptar
+              </button>
+              <button
+                className="modal-btn modal-btn-cancel"
+                onClick={() => setShowLoginModal(false)}
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main content */}
       <div className="main-content" ref={mainContentRef}>

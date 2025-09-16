@@ -10,13 +10,13 @@ interface FormState {
 
 // Define el componente funcional con la tipificación de React.FC
 const LoginPage: React.FC = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<FormState>({
     email: "",
     password: "",
   });
 
   const [message, setMessage] = useState(""); // Estado para mensajes de éxito/error
-  const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -28,25 +28,22 @@ const LoginPage: React.FC = () => {
   // Mantén solo esta versión de handleSubmit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setMessage("Iniciando sesión...");
 
     try {
       const response = await axios.post(
         "http://localhost:5000/api/login",
         formData
       );
-      setMessage(response.data.message);
-      console.log(response.data);
-      // Si el login es exitoso, navega al homepage
-      if (response.data.success) {
-        navigate("/home");
-      }
-    } catch (error: any) {
-      setMessage(error.response?.data?.message || "Error de conexión.");
-      console.error(error.response?.data);
+
+      // 1. Guarda el token en el Local Storage
+      localStorage.setItem("token", response.data.token);
+      setMessage("Inicio de sesión exitoso."); // Mensaje de éxito
+
+      navigate("/home");
+    } catch (err: any) {
+      setMessage(err.response?.data?.message || "Error de conexión.");
     }
   };
-
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       const elements = document.querySelectorAll(".bg-element");
@@ -57,7 +54,9 @@ const LoginPage: React.FC = () => {
         const speed = (index + 1) * 0.5;
         const xPos = (x - 0.5) * speed * 20;
         const yPos = (y - 0.5) * speed * 20;
-        (element as HTMLElement).style.transform = `translate(${xPos}px, ${yPos}px)`;
+        (
+          element as HTMLElement
+        ).style.transform = `translate(${xPos}px, ${yPos}px)`;
       });
     };
 
@@ -93,6 +92,8 @@ const LoginPage: React.FC = () => {
               className="form-input"
               placeholder="tu@email.com"
               required
+              //  Atributo para que el navegador guarde el correo
+              autoComplete="username"
               value={formData.email}
               onChange={handleChange}
             />
@@ -109,6 +110,8 @@ const LoginPage: React.FC = () => {
               className="form-input"
               placeholder="••••••••"
               required
+              // Atributo para que el navegador guarde la contraseña
+              autoComplete="current-password"
               value={formData.password}
               onChange={handleChange}
             />
