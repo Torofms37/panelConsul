@@ -7,7 +7,7 @@ const sections = [
   {
     id: "home",
     icon: "🏠",
-    title: "Inicio",
+    title: "Bienvenido a la DB",
     content: (
       <>
         <p>
@@ -57,81 +57,6 @@ const sections = [
         <p>
           Organiza tus proyectos por categorías, prioridades y estados para
           mantener todo bajo control y maximizar tu productividad.
-        </p>
-      </>
-    ),
-  },
-  {
-    id: "analytics",
-    icon: "📈",
-    title: "Analíticas",
-    content: (
-      <>
-        <p>
-          Analiza el rendimiento de tus proyectos y campañas con herramientas
-          avanzadas de análisis. Obtén insights valiosos para tomar mejores
-          decisiones.
-        </p>
-        <br />
-        <p>
-          Visualiza tendencias, compara períodos y genera reportes
-          personalizados para compartir con tu equipo o clientes.
-        </p>
-      </>
-    ),
-  },
-  {
-    id: "messages",
-    icon: "💬",
-    title: "Mensajes",
-    content: (
-      <>
-        <p>
-          Centro de comunicación integrado donde puedes gestionar todas tus
-          conversaciones. Chat en tiempo real, notificaciones y historial
-          completo.
-        </p>
-        <br />
-        <p>
-          Mantente conectado con tu equipo y clientes sin salir de la
-          plataforma. Comparte archivos, enlaces y colabora de manera eficiente.
-        </p>
-      </>
-    ),
-  },
-  {
-    id: "settings",
-    icon: "⚙️",
-    title: "Configuración",
-    content: (
-      <>
-        <p>
-          Personaliza tu experiencia ajustando las preferencias de la
-          aplicación. Configura notificaciones, temas, idioma y opciones de
-          privacidad.
-        </p>
-        <br />
-        <p>
-          Gestiona tu cuenta, cambia contraseñas, configura la autenticación de
-          dos factores y controla quién puede acceder a tu información.
-        </p>
-      </>
-    ),
-  },
-  {
-    id: "profile",
-    icon: "👤",
-    title: "Perfil",
-    content: (
-      <>
-        <p>
-          Administra tu información personal y profesional. Actualiza tu foto de
-          perfil, información de contacto y preferencias de comunicación.
-        </p>
-        <br />
-        <p>
-          Conecta tus redes sociales, añade tu biografía y personaliza cómo
-          otros usuarios pueden verte e interactuar contigo en la plataforma.
         </p>
       </>
     ),
@@ -192,7 +117,9 @@ const HomePage: React.FC = () => {
   };
 
   // Función para crear partículas
-  const createParticles = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+  const createParticles = (
+    event: React.MouseEvent<HTMLDivElement, MouseEvent>
+  ) => {
     for (let i = 0; i < 8; i++) {
       const particle = document.createElement("div");
       particle.classList.add("particle");
@@ -242,24 +169,32 @@ const HomePage: React.FC = () => {
       createParticles(e);
       return;
     }
-    
+
     if (showWelcome) {
       setShowWelcome(false);
     }
-    
+
     setTimeout(() => {
       setActiveSection(sectionId);
     }, 300);
 
     createParticles(e);
   };
-  
+
   return (
     <>
       {/* Animated background elements */}
       <div className="bg-element"></div>
       <div className="bg-element"></div>
       <div className="bg-element"></div>
+
+      <div
+        className="sidebar-button fixed left-3 top-3"
+        data-section="logout"
+        onClick={(e) => handleButtonClick(e, "logout")}
+      >
+        <i>🔙</i>
+      </div>
 
       {/* Sidebar */}
       <div className="sidebar">
@@ -275,15 +210,8 @@ const HomePage: React.FC = () => {
             <i>{section.icon}</i>
           </div>
         ))}
-        <div
-          className="sidebar-button"
-          data-section="logout"
-          onClick={(e) => handleButtonClick(e, "logout")}
-        >
-          <i>🚪</i>
-        </div>
       </div>
-      
+
       {/* Modal de logout */}
       {showLogoutModal && (
         <div className="modal-overlay">
@@ -309,7 +237,7 @@ const HomePage: React.FC = () => {
           </div>
         </div>
       )}
-      
+
       {/* Nuevo modal de inicio de sesión */}
       {showLoginModal && (
         <div className="modal-overlay">
