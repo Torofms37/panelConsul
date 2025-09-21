@@ -1,0 +1,124 @@
+/* Contenedor para noticias urgentes */
+.urgent-container {
+  border-left: 5px solid #ffbf00; /* Amarillo */
+  background-color: #3b281f; /* Rojo oscuro con toque de naranja */
+  padding: 20px;
+  margin-bottom: 30px;
+  border-radius: 8px;
+  position: relative;
+  box-shadow: 0 4px 15px rgba(255, 191, 0, 0.2);
+}
+
+.urgent-title {
+  color: #ffbf00; /* Amarillo */
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.urgent-card {
+  padding: 15px;
+  border-radius: 8px;
+  background-color: #281a14;
+  margin-bottom: 10px;
+  border-left: 3px solid #ffbf00;
+}
+
+.urgent-card-title {
+  color: #f1f5f9;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.urgent-card-content {
+  color: #a7a7a7;
+  font-size: 0.9rem;
+}
+
+/* Contenedor para noticias normales */
+.normal-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Botones de acción dentro de las tarjetas */
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.action-buttons button {
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.urgent-btn {
+  background-color: #f97316; /* Naranja */
+  color: white;
+}
+
+.urgent-btn:hover {
+  background-color: #e06c13;
+}
+
+.urgent-btn-cancel {
+  background-color: #64748b;
+  color: #e2e8f0;
+}
+
+.urgent-btn-cancel:hover {
+  background-color: #5b677a;
+}
+
+.delete-btn {
+  background-color: #dc2626; /* Rojo */
+  color: white;
+}
+
+.delete-btn:hover {
+  background-color: #b91c1c;
+}
+
+.empty-state {
+  text-align: center;
+  color: #64748b;
+  padding: 40px;
+}
+
+/* Estilos de las tarjetas existentes para mantener consistencia */
+.content-card {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 25px;
+  transition: all 0.3s ease;
+}
+
+.content-card:hover {
+  border-color: #475569;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.card-title {
+  color: #f1f5f9;
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.card-content {
+  color: #94a3b8;
+  line-height: 1.6;
+}

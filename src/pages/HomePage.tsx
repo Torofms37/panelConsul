@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
-// import axios from "axios";
 import "../styles/homeStyles.css";
 import { Novedades } from "./components/Novedades";
 import { Calendario } from "./components/Calendario";
