@@ -1,0 +1,165 @@
+/* Contenedor principal de contabilidad */
+.contaduria-container {
+  display: flex;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+/* Sección de alumnos */
+.alumnos-list-section {
+  flex: 3; /* Ocupa 3/4 del espacio */
+}
+
+/* Sección de resumen financiero */
+.financial-summary-section {
+  flex: 1; /* Ocupa 1/4 del espacio */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Tabla de alumnos */
+.alumnos-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.alumnos-table th,
+.alumnos-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #334155;
+  white-space: nowrap; /* Evita que el texto se divida en varias líneas */
+}
+
+.alumnos-table th {
+  background-color: #1e293b;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+/* Estilos de la nueva columna de pagos */
+.alumnos-table td:nth-child(4) {
+  width: 150px; /* Ancho fijo para la columna de pagos */
+}
+
+.payment-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.payment-status-paid {
+  color: #22c55e; /* Verde */
+}
+
+.payment-status-unpaid {
+  color: #ef4444; /* Rojo */
+}
+
+.payment-status-partial {
+  color: #f97316; /* Naranja */
+}
+
+/* Resumen financiero */
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 0;
+  border-bottom: 1px solid #334155;
+}
+
+.summary-item:last-child {
+  border-bottom: none;
+}
+
+.summary-item p {
+  font-size: 1rem;
+  color: #94a3b8;
+}
+
+.ingresos-recibidos {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #22c55e;
+}
+
+.ingresos-pendientes {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ef4444;
+}
+
+/* Gráfica de pastel */
+.chart-container {
+  margin-top: 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column; /* Apila los elementos verticalmente */
+  align-items: center;
+}
+
+.chart-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #f1f5f9;
+  margin-bottom: 15px;
+}
+
+.pie-chart-wrapper {
+  width: 100%; /* La gráfica ocupará todo el ancho disponible */
+  display: flex;
+  justify-content: center;
+}
+
+.pie-chart {
+  width: 150px; /* La gráfica ahora es más grande */
+  height: 150px;
+  border-radius: 50%;
+}
+
+.chart-legend-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: #94a3b8;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.green-dot {
+  background-color: #22c55e;
+}
+
+.orange-dot {
+  background-color: #f97316;
+}
+
+.red-dot {
+  background-color: #ef4444;
+}
+
+/* Adaptación para pantallas pequeñas */
+@media (max-width: 1024px) {
+  .contaduria-container {
+    flex-direction: column;
+  }
+}
