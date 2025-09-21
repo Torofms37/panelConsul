@@ -1,73 +1,41 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
-// import axios from "axios";
 import "../styles/homeStyles.css";
+// import { Calendar, momentLocalizer } from "react-big-calendar";
+// import moment from "moment";
+import { Calendar, globalizeLocalizer } from 'react-big-calendar'
+import globalize from 'globalize'
+import "react-big-calendar/lib/css/react-big-calendar.css";
+
+// Para buenas prácticas, localizer debe estar fuera del componente
 
 const sections = [
   {
     id: "home",
     icon: "🏠",
     title: "Bienvenido a la DB",
-    content: (
-      <>
-        <p>
-          Esta es tu página de inicio. Aquí puedes ver un resumen de toda tu
-          actividad y acceder rápidamente a las funciones más importantes.
-        </p>
-        <br />
-        <p>
-          El diseño utiliza efectos de glassmorphism con un hermoso modo oscuro
-          que combina azul, naranja y amarillo para crear una experiencia visual
-          única.
-        </p>
-      </>
-    ),
   },
   {
     id: "dashboard",
     icon: "📊",
     title: "Dashboard",
-    content: (
-      <>
-        <p>
-          Aquí encontrarás todas tus métricas y estadísticas importantes.
-          Gráficos interactivos, KPIs y datos en tiempo real para mantener el
-          control de tu negocio.
-        </p>
-        <br />
-        <p>
-          Los datos se actualizan automáticamente y puedes personalizar qué
-          información quieres ver en tu dashboard principal.
-        </p>
-      </>
-    ),
   },
   {
     id: "projects",
     icon: "📁",
     title: "Proyectos",
-    content: (
-      <>
-        <p>
-          Gestiona todos tus proyectos desde un solo lugar. Crea nuevos
-          proyectos, asigna tareas, establece fechas límite y colabora con tu
-          equipo.
-        </p>
-        <br />
-        <p>
-          Organiza tus proyectos por categorías, prioridades y estados para
-          mantener todo bajo control y maximizar tu productividad.
-        </p>
-      </>
-    ),
   },
 ];
+
+// const localizer = momentLocalizer(moment);
+const localizer = globalizeLocalizer(globalize)
 
 const HomePage: React.FC = () => {
   const [activeSection, setActiveSection] = useState("home");
   const [showWelcome, setShowWelcome] = useState(true);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
   const mainContentRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
@@ -85,9 +53,7 @@ const HomePage: React.FC = () => {
         element.style.transform = `translate(${xPos}px, ${yPos}px)`;
       });
     };
-
     document.addEventListener("mousemove", handleMouseMove);
-
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
     };
@@ -110,7 +76,6 @@ const HomePage: React.FC = () => {
     ripple.style.top = `${y}px`;
 
     element.appendChild(ripple);
-
     setTimeout(() => {
       ripple.remove();
     }, 600);
@@ -147,7 +112,6 @@ const HomePage: React.FC = () => {
           easing: "cubic-bezier(0.4, 0, 0.2, 1)",
         }
       );
-
       animation.onfinish = () => particle.remove();
     }
   };
@@ -170,6 +134,8 @@ const HomePage: React.FC = () => {
       return;
     }
 
+    setShowCalendar(false);
+
     if (showWelcome) {
       setShowWelcome(false);
     }
@@ -179,6 +145,74 @@ const HomePage: React.FC = () => {
     }, 300);
 
     createParticles(e);
+  };
+
+  const renderSectionContent = (sectionId: string) => {
+    switch (sectionId) {
+      case "home":
+        return (
+          <>
+            <p>
+              Esta es tu página de inicio. Aquí puedes ver un resumen de toda tu
+              actividad y acceder rápidamente a las funciones más importantes.
+            </p>
+            <br />
+            <p>
+              El diseño utiliza efectos de glassmorphism con un hermoso modo
+              oscuro que combina azul, naranja y amarillo para crear una
+              experiencia visual única.
+            </p>
+          </>
+        );
+      case "dashboard":
+        return (
+          <>
+            <p>
+              Aquí encontrarás todas tus métricas y estadísticas importantes.
+              Gráficos interactivos, KPIs y datos en tiempo real para mantener
+              el control de tu negocio.
+            </p>
+            <br />
+            <p>
+              Los datos se actualizan automáticamente y puedes personalizar qué
+              información quieres ver en tu dashboard principal.
+            </p>
+            {/* <button
+              className="modal-btn modal-btn-confirm mt-4"
+              onClick={() => setShowCalendar(!showCalendar)}
+            >
+              {showCalendar ? "Ocultar Calendario" : "Abre el calendario"}
+            </button> */}
+
+            <Calendar
+              localizer={localizer}
+              // events={myEventsList}
+              startAccessor="start"
+              endAccessor="end"
+              style={{ height: 500 }}
+            />
+            {/* {showCalendar && (
+            )} */}
+          </>
+        );
+      case "projects":
+        return (
+          <>
+            <p>
+              Gestiona todos tus proyectos desde un solo lugar. Crea nuevos
+              proyectos, asigna tareas, establece fechas límite y colabora con
+              tu equipo.
+            </p>
+            <br />
+            <p>
+              Organiza tus proyectos por categorías, prioridades y estados para
+              mantener todo bajo control y maximizar tu productividad.
+            </p>
+          </>
+        );
+      default:
+        return null;
+    }
   };
 
   return (
@@ -289,7 +323,9 @@ const HomePage: React.FC = () => {
                 <span>{section.icon}</span>
                 {section.title}
               </h2>
-              <div className="section-content">{section.content}</div>
+              <div className="section-content">
+                {renderSectionContent(section.id)}
+              </div>
             </div>
           ))}
         </div>
