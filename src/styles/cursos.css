@@ -1,0 +1,149 @@
+/*
+ * Archivo de estilos para el componente Cursos
+ */
+
+.groups-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 25px;
+  margin-top: 20px;
+  justify-content: start; /* Asegura que la cuadrícula se alinee a la izquierda */
+  width: 100%; /* Ocupa todo el ancho del contenedor padre */
+}
+
+.group-card {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 30px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  text-align: left; /* Alineación del texto a la izquierda */
+  align-items: flex-start; /* Alinea los elementos hijos al inicio (izquierda) */
+  width: 100%; /* Las tarjetas ocupan el 100% de su celda en la cuadrícula */
+}
+
+.group-card:hover {
+  border-color: #475569;
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.group-name {
+  color: #f1f5f9;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.group-info {
+  color: #94a3b8;
+  font-size: 1rem;
+}
+
+.group-actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 15px;
+}
+
+.view-details-btn,
+.download-all-btn,
+.download-selected-btn {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.view-details-btn:hover,
+.download-all-btn:hover,
+.download-selected-btn:hover {
+  background: #2563eb;
+  transform: translateY(-2px);
+}
+
+.download-selected-btn:disabled {
+  background: #475569;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.back-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+  color: #f1f5f9;
+}
+
+.alumnos-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.alumnos-table th,
+.alumnos-table td {
+  padding: 15px;
+  text-align: left;
+  border-bottom: 1px solid #334155;
+}
+
+.alumnos-table th {
+  background-color: #1e293b;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.alumnos-table td:first-child,
+.alumnos-table th:first-child {
+  width: 40px;
+}
+
+.pago-ok {
+  color: #22c55e;
+}
+
+.pago-pendiente {
+  color: #ef4444;
+}
+
+.download-btn {
+  background: #22c55e;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.download-btn:disabled {
+  background: #475569;
+  cursor: not-allowed;
+}
+
+.download-btn:hover:not(:disabled) {
+  background: #16a34a;
+  transform: translateY(-2px);
+}

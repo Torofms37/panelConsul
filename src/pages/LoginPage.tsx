@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { useNavigate } from "react-router";
+import axios, { AxiosError } from "axios";
+import { Link, useNavigate } from "react-router";
 
 // Define el tipo para el estado del formulario para una mejor tipificación con TypeScript
 interface FormState {
@@ -40,8 +40,12 @@ const LoginPage: React.FC = () => {
       setMessage("Inicio de sesión exitoso."); // Mensaje de éxito
 
       navigate("/home");
-    } catch (err: any) {
-      setMessage(err.response?.data?.message || "Error de conexión.");
+    } catch (err) {
+      const error = err as AxiosError<{ message: string }>;
+
+      setMessage(
+        error.response?.data?.message || "Error al conectar con el servidor."
+      );
     }
   };
   useEffect(() => {
@@ -120,6 +124,11 @@ const LoginPage: React.FC = () => {
           <button type="submit" className="login-button">
             Entrar
           </button>
+          <Link to="/register">
+            <span className="text-blue-200 font-extralight hover:underline">
+              Cree una cuenta profesor/a
+            </span>
+          </Link>
         </form>
       </div>
 

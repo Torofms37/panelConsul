@@ -4,7 +4,7 @@ import "../styles/homeStyles.css";
 import { Novedades } from "./components/Novedades";
 import { Calendario } from "./components/Calendario";
 import { Contaduria } from "./components/Contaduria";
-import { Proyectos } from "./components/Proyectos";
+import { Cursos } from "./components/Cursos";
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -44,16 +44,9 @@ const HomePage: React.FC = () => {
 
   return (
     <>
-      <div className="header">
-        <button className="logout-btn" onClick={showLogoutModal}>
-          <span>🚪</span>
-          Cerrar Sesión
-        </button>
-      </div>
-
       <div className="sidebar">
         <div className="sidebar-header">
-          <h1 className="sidebar-title">Sistema Admin</h1>
+          <h1 className="sidebar-title">{name}</h1>
         </div>
 
         <nav className="sidebar-nav">
@@ -82,20 +75,26 @@ const HomePage: React.FC = () => {
           </button>
 
           <button
-            className={`nav-button ${activeSection === "proyectos" ? "active" : ""}`}
-            onClick={() => handleNavClick("proyectos")}
+            className={`nav-button ${activeSection === "cursos" ? "active" : ""}`}
+            onClick={() => handleNavClick("cursos")}
           >
             <span className="nav-icon">📊</span>
-            Proyectos
+            Cursos
           </button>
         </nav>
+        {/* El botón de cerrar sesión se mueve aquí, en un footer de la barra lateral */}
+        <div className="sidebar-footer">
+          <button className="logout-btn" onClick={showLogoutModal}>
+            Cerrar Sesión
+          </button>
+        </div>
       </div>
 
       <div className="main-content">
         {activeSection === "novedades" && <Novedades />}
         {activeSection === "calendario" && <Calendario />}
         {activeSection === "contaduria" && <Contaduria />}
-        {activeSection === "proyectos" && <Proyectos />}
+        {activeSection === "cursos" && <Cursos />}
       </div>
 
       {showModal && (
@@ -104,8 +103,7 @@ const HomePage: React.FC = () => {
             <div className="modal-icon">⚠️</div>
             <h3 className="modal-title">Confirmar Cierre de Sesión</h3>
             <p className="modal-text">
-              ¿Estás seguro de que deseas cerrar sesión? Perderás cualquier
-              trabajo no guardado.
+              ¿Estás seguro de que deseas cerrar sesión? Perderás cualquier trabajo no guardado.
             </p>
             <div className="modal-buttons">
               <button
