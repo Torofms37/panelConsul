@@ -5,11 +5,15 @@ import { Novedades } from "./components/Novedades";
 import { Calendario } from "./components/Calendario";
 import { Contaduria } from "./components/Contaduria";
 import { Cursos } from "./components/Cursos";
+import { useAuth } from "../hooks/useAuth";
+
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState("novedades");
   const [showModal, setShowModal] = useState(false);
+
+  const { user } = useAuth();
 
   const confirmLogout = () => {
     localStorage.removeItem("token");
@@ -46,7 +50,7 @@ const HomePage: React.FC = () => {
     <>
       <div className="sidebar">
         <div className="sidebar-header">
-          <h1 className="sidebar-title">{name}</h1>
+          <h1 className="sidebar-title">{user.name || "Cargando..."}</h1>
         </div>
 
         <nav className="sidebar-nav">

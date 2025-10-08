@@ -37,7 +37,8 @@ const LoginPage: React.FC = () => {
 
       // 1. Guarda el token en el Local Storage
       localStorage.setItem("token", response.data.token);
-      setMessage("Inicio de sesión exitoso."); // Mensaje de éxito
+      localStorage.setItem("userName", response.data.user.name); 
+      setMessage("Inicio de sesión exitoso.");
 
       navigate("/home");
     } catch (err) {
