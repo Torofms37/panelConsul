@@ -17,6 +17,22 @@ mongoose
   .then(() => console.log("Conectado a mongoDB Atlas"))
   .catch((err) => console.error("Error al conectar a mongoDB", err));
 
+const alumnoSchema = new mongoose.Schema({
+  fullName: { type: String, required: true },
+  moneyProvided: { type: Number, default: 0 },
+  groupName: { type: String, required: true },
+});
+const Alumno = mongoose.model("Alumno", alumnoSchema);
+
+// Esquema de Usuario (Maestro)
+const userSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+});
+const User = mongoose.model("User", userSchema);
+
+// Esquema de Grupo (Con fechas y referencia a alumnos)
 const groupSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, unique: true },
@@ -24,50 +40,36 @@ const groupSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      unique: true,
     },
     teacherName: { type: String, required: true },
+    fechaInicio: { type: String, required: true }, // Fecha general del curso
+    fechaTermino: { type: String, required: true }, // Fecha general del curso
     students: [{ type: mongoose.Schema.Types.ObjectId, ref: "Alumno" }],
-    totalMoney: { type: String, default: 0 },
   },
   { timestamps: true }
 );
-
 const Group = mongoose.model("Group", groupSchema);
 
-const alumnoSchema = new mongoose.Schema({
-  fullName: { type: String, required: true },
-  grouName: { type: String, required: true },
-  startDate: { type: Date, required: true },
-  endDate: { type: Date, required: true },
-  moneyPrivided: { type: Number, required: true },
-  group: { type: String, required: true },
-});
-const Alumno = mongoose.model("Alumno", alumnoSchema);
+// --- 2. Middlewares y Rutas ---
 
-const userSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-});
-
-const User = mongoose.model("User", userSchema);
-
-// server.js - Middleware
+// Middleware para verificar el JWT
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
 
-  if (token == null) return res.sendStatus(401); // (Si no hay token)
+  if (token == null) return res.sendStatus(401);
 
   jwt.verify(token, JWT_SECRET, (err, user) => {
-    if (err) return res.sendStatus(403); // (Si el token es inválido)
+    if (err) {
+      console.error("JWT Verification Failed:", err.message);
+      return res.sendStatus(403); // Prohibido
+    }
     req.user = user;
     next();
   });
 };
 
-// RUTA DE REGISTRO
+// RUTA DE REGISTRO (Ya corregida)
 app.post("/api/register", async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -82,26 +84,22 @@ app.post("/api/register", async (req, res) => {
 
     res.status(201).json({ message: "Usuario registrado exitosamente." });
   } catch (error) {
-    console.error(error);
+    console.error("Error en registro:", error);
     res.status(500).json({ error: "Error interno del servidor al registrar." });
   }
 });
 
+// RUTA DE INICIO DE SESIÓN (Incluye 'name' en el payload)
 app.post("/api/login", async (req, res) => {
   try {
     const { email, password } = req.body;
-
     const user = await User.findOne({ email });
 
-    if (!user) {
+    if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(400).json({ message: "Credenciales inválidas." });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ message: "Credenciales inválidas." });
-    }
-
+    // Payload incluye el ID, email y NAME
     const payload = { id: user._id, email: user.email, name: user.name };
     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "1h" });
 
@@ -115,13 +113,7 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
-app.get("/api/dashboard", authenticateToken, (req, res) => {
-  res.status(200).json({
-    message: `Bienvenido, ${req.user.email}!`,
-    data: "Esto es información sensible del dashboard.",
-  });
-});
-
+// RUTA PROTEGIDA: OBTENER GRUPOS DEL MAESTRO
 app.get("/api/groups", authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
@@ -132,21 +124,21 @@ app.get("/api/groups", authenticateToken, async (req, res) => {
 
     res.status(200).json(groups);
   } catch (error) {
-    console.error(error);
+    console.error("Error al obtener grupos:", error);
     res.status(500).json({ message: "Error al obtener los grupos." });
   }
 });
 
+// RUTA PROTEGIDA: CREAR GRUPO Y ALUMNOS
 app.post("/api/groups", authenticateToken, async (req, res) => {
   try {
-    const { name } = req.body;
+    const { name, teacherName, fechaInicio, fechaTermino, students } = req.body;
     const teacherId = req.user.id;
-    const teacherName = req.user.name;
 
-    if (!name) {
+    if (!name || !fechaInicio || !fechaTermino || !teacherName) {
       return res
         .status(400)
-        .json({ message: "El nombre del grupo es obligatorio." });
+        .json({ message: "Faltan datos requeridos del grupo." });
     }
 
     const existingGroup = await Group.findOne({ name });
@@ -156,23 +148,47 @@ app.post("/api/groups", authenticateToken, async (req, res) => {
         .json({ message: "Ya existe un grupo con ese nombre." });
     }
 
+    // 1. Crear a los alumnos
+    const studentsData = students.map((student) => ({
+      fullName: student.nombre,
+      moneyProvided: student.dineroEntregado,
+      groupName: name,
+    }));
+
+    const createdStudents = await Alumno.insertMany(studentsData);
+
+    // 2. Crear el grupo con las referencias
     const newGroup = new Group({
       name,
       teacher: teacherId,
-      teacherName: teacherName || "Maestro Desconocido",
-      students: [],
+      teacherName: teacherName,
+      fechaInicio,
+      fechaTermino,
+      students: createdStudents.map((student) => student._id),
     });
 
     await newGroup.save();
+
+    // 3. Devolver el grupo completo con los datos de los alumnos
+    const groupWithStudents = await Group.findById(newGroup._id).populate(
+      "students"
+    );
+
     res
       .status(201)
-      .json({ message: "Grupo creado exitosamente.", group: newGroup });
+      .json({
+        message: "Grupo creado exitosamente.",
+        group: groupWithStudents,
+      });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error al crear el grupo." });
+    console.error("Error al crear grupo:", error);
+    res
+      .status(500)
+      .json({ message: "Error interno del servidor al crear el grupo." });
   }
 });
 
+// --- 3. Inicio del Servidor ---
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Servidor escuchando en el puerto ${PORT}`);
