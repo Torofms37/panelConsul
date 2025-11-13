@@ -188,6 +188,88 @@ app.post("/api/groups", authenticateToken, async (req, res) => {
   }
 });
 
+// RUTA PROTEGIDA: ELIMINAR GRUPO
+app.delete('/api/groups/:groupId', authenticateToken, async (req, res) => {
+    try {
+        const { groupId } = req.params;
+
+        // 1. Eliminar todos los alumnos asociados al grupo
+        const groupToDelete = await Group.findById(groupId);
+        if (groupToDelete) {
+            await Alumno.deleteMany({ _id: { $in: groupToDelete.students } });
+        }
+        
+        // 2. Eliminar el grupo
+        const result = await Group.findByIdAndDelete(groupId);
+
+        if (!result) {
+            return res.status(404).json({ message: 'Grupo no encontrado.' });
+        }
+
+        res.status(200).json({ message: 'Grupo y alumnos asociados eliminados correctamente.' });
+
+    } catch (error) {
+        console.error("Error al eliminar grupo:", error);
+        res.status(500).json({ message: 'Error interno del servidor al eliminar el grupo.' });
+    }
+});
+
+// RUTA PROTEGIDA: ACTUALIZAR DETALLES DEL GRUPO
+app.put('/api/groups/:groupId', authenticateToken, async (req, res) => {
+    try {
+        const { groupId } = req.params;
+        const updates = req.body;
+
+        const updatedGroup = await Group.findByIdAndUpdate(groupId, updates, { new: true, runValidators: true })
+            .populate('students');
+
+        if (!updatedGroup) {
+            return res.status(404).json({ message: 'Grupo no encontrado para actualizar.' });
+        }
+
+        res.status(200).json({ message: 'Grupo actualizado exitosamente.', group: updatedGroup });
+
+    } catch (error) {
+        console.error("Error al actualizar grupo:", error);
+        res.status(500).json({ message: 'Error interno del servidor al actualizar el grupo.' });
+    }
+});
+
+// RUTA PROTEGIDA: AÑADIR ALUMNO A UN GRUPO EXISTENTE
+app.post('/api/groups/:groupId/students', authenticateToken, async (req, res) => {
+    try {
+        const { groupId } = req.params;
+        const { nombre, dineroEntregado } = req.body; // Nuevo alumno
+
+        const group = await Group.findById(groupId);
+        if (!group) {
+            return res.status(404).json({ message: 'Grupo no encontrado.' });
+        }
+
+        // 1. Crear el nuevo alumno
+        const newStudent = new Alumno({
+            fullName: nombre,
+            moneyProvided: dineroEntregado,
+            groupName: group.name, 
+        });
+        await newStudent.save();
+
+        // 2. Agregar el ID del alumno al array 'students' del grupo
+        group.students.push(newStudent._id);
+        await group.save();
+
+        // 3. Devolver el alumno recién creado para actualizar el frontend
+        res.status(201).json({ 
+            message: 'Alumno añadido al grupo exitosamente.', 
+            student: newStudent 
+        });
+
+    } catch (error) {
+        console.error("Error al añadir alumno:", error);
+        res.status(500).json({ message: 'Error interno del servidor al añadir el alumno.' });
+    }
+});
+
 // --- 3. Inicio del Servidor ---
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

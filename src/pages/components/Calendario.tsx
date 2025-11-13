@@ -29,6 +29,7 @@ export const Calendario = () => {
   const { user } = useAuth();
   const [grupos, setGrupos] = useState<Grupo[]>([]); // Se usa para listar los grupos
   const [modoCreacion, setModoCreacion] = useState(false);
+  const [editingGroup, setEditingGroup] = useState<Grupo | null>(null);
 
   // Estado inicial del nuevo grupo
   const [nuevoGrupo, setNuevoGrupo] = useState<{
@@ -124,6 +125,162 @@ export const Calendario = () => {
       students: [...prev.students, nuevoAlumno],
     }));
     setNuevoAlumno({ nombre: "", dineroEntregado: 0 });
+  };
+
+  const handleUpdateGroup = async (
+    groupId: string,
+    updatedFields: Partial<Grupo>
+  ) => {
+    setLoading(true);
+    const config = getAuthConfig();
+    if (!config) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await axios.put(
+        `http://localhost:5000/api/groups/${groupId}`,
+        updatedFields,
+        config
+      );
+
+      // Actualiza el estado local de grupos con el grupo recién modificado
+      setGrupos((prev) =>
+        prev.map((g) => (g._id === groupId ? response.data.group : g))
+      );
+
+      setError(null);
+      alert(`Grupo '${response.data.group.name}' actualizado.`);
+    } catch (err) {
+      const error = err as AxiosError<{ message: string }>;
+      setError(
+        error.response?.data?.message || "Error al actualizar el grupo."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteGroup = async (groupId: string) => {
+    if (
+      !window.confirm(
+        "¿Estás seguro de que quieres eliminar este grupo y todos sus alumnos? Esta acción es irreversible."
+      )
+    ) {
+      return;
+    }
+
+    setLoading(true);
+    const config = getAuthConfig();
+    if (!config) {
+      return;
+    }
+
+    try {
+      await axios.delete(`http://localhost:5000/api/groups/${groupId}`, config);
+
+      // Actualiza el estado local eliminando el grupo
+      setGrupos((prev) => prev.filter((g) => g._id !== groupId));
+      setError(null);
+      alert("Grupo eliminado exitosamente.");
+    } catch (err) {
+      const error = err as AxiosError<{ message: string }>;
+      setError(error.response?.data?.message || "Error al eliminar el grupo.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddAlumnoToExistingGroup = async (
+    groupId: string,
+    alumnoData: NuevoAlumnoData
+  ) => {
+    if (!alumnoData.nombre.trim()) {
+      alert("El nombre del alumno es obligatorio.");
+      return;
+    }
+
+    setLoading(true);
+    const config = getAuthConfig();
+    if (!config) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        `http://localhost:5000/api/groups/${groupId}/students`,
+        alumnoData,
+        config
+      );
+
+      const newStudent = response.data.student;
+
+      setGrupos((prev) =>
+        prev.map((g) => {
+          if (g._id === groupId) {
+            const newAlumno: Alumno = {
+              id: newStudent._id,
+              nombre: newStudent.fullName,
+              dineroEntregado: newStudent.moneyProvided,
+            };
+            return { ...g, students: [...g.students, newAlumno] };
+          }
+          return g;
+        })
+      );
+
+      setError(null);
+      alert(`Alumno ${newStudent.fullName} añadido al grupo.`);
+    } catch (err) {
+      const error = err as AxiosError<{ message: string }>;
+      setError(error.response?.data?.message || "Error al añadir el alumno.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Función que carga el grupo en el estado de edición y abre el modal
+  const startEditGroup = (grupo: Grupo) => {
+    setEditingGroup(grupo);
+    // Puedes usar un modal de React normal en lugar de alert()
+  };
+
+  // Función para guardar los cambios (similar a handleGuardarGrupo, pero con PUT)
+  const handleSaveEdit = async () => {
+    if (
+      !editingGroup ||
+      !editingGroup.name.trim() ||
+      !editingGroup.fechaInicio
+    ) {
+      setError("Faltan campos obligatorios.");
+      return;
+    }
+
+    setLoading(true);
+    const config = getAuthConfig();
+    if (!config) return;
+
+    try {
+      const response = await axios.put(
+        `http://localhost:5000/api/groups/${editingGroup._id}`,
+        editingGroup, // Enviamos el objeto con los cambios
+        config
+      );
+
+      // Actualizar el estado local con el grupo actualizado
+      setGrupos((prev) =>
+        prev.map((g) => (g._id === editingGroup._id ? response.data.group : g))
+      );
+
+      setEditingGroup(null); // Cerrar modal
+    } catch (err) {
+      const error = err as AxiosError<{ message: string }>;
+      setError(error.response?.data?.message || "Error al guardar la edición.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Lógica para guardar el grupo en el backend
@@ -367,6 +524,24 @@ export const Calendario = () => {
                   <p>
                     Periodo: {grupo.fechaInicio} al {grupo.fechaTermino}
                   </p>
+
+                  <div className="group-actions">
+                    {/* Aquí puedes llamar a una función para abrir un modal de edición */}
+                    <button
+                      className="edit-btn"
+                      onClick={() => startEditGroup(grupo)} // LLAMADA CORRECTA
+                      disabled={loading}
+                    >
+                      Editar
+                    </button>
+                    <button
+                      className="delete-btn"
+                      onClick={() => handleDeleteGroup(grupo._id)}
+                      disabled={loading}
+                    >
+                      Eliminar
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
