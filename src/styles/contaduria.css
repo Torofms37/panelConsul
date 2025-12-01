@@ -21,16 +21,17 @@
 /* Tabla de alumnos */
 .alumnos-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   margin-top: 20px;
 }
 
 .alumnos-table th,
 .alumnos-table td {
-  padding: 12px;
+  padding: 16px;
   text-align: left;
   border-bottom: 1px solid #334155;
-  white-space: nowrap; /* Evita que el texto se divida en varias líneas */
+  vertical-align: middle;
 }
 
 .alumnos-table th {
@@ -38,30 +39,122 @@
   font-size: 0.9rem;
   font-weight: 600;
   color: #e2e8f0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.alumnos-table tbody tr {
+  background-color: rgba(30, 41, 59, 0.3);
+  transition: all 0.2s ease;
+}
+
+.alumnos-table tbody tr:hover {
+  background-color: rgba(59, 130, 246, 0.1);
+  transform: scale(1.01);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.alumnos-table td {
+  color: #cbd5e1;
+  font-size: 0.95rem;
 }
 
 /* Estilos de la nueva columna de pagos */
 .alumnos-table td:nth-child(4) {
-  width: 150px; /* Ancho fijo para la columna de pagos */
+  font-weight: 600;
+  color: #22c55e;
 }
 
 .payment-status {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  line-height: 1;
 }
 
 .payment-status-paid {
-  color: #22c55e; /* Verde */
+  background: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+  border: 1px solid rgba(34, 197, 94, 0.3);
 }
 
 .payment-status-unpaid {
-  color: #ef4444; /* Rojo */
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
 .payment-status-partial {
-  color: #f97316; /* Naranja */
+  background: rgba(249, 115, 22, 0.15);
+  color: #f97316;
+  border: 1px solid rgba(249, 115, 22, 0.3);
+}
+
+/* Estilos para edición */
+.edit-input {
+  width: 100px;
+  padding: 6px 10px;
+  background: #1e293b;
+  border: 1px solid #475569;
+  border-radius: 6px;
+  color: #f1f5f9;
+  font-size: 0.9rem;
+}
+
+.edit-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.edit-btn,
+.save-btn,
+.cancel-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.edit-btn {
+  background: #3b82f6;
+  color: white;
+}
+
+.edit-btn:hover {
+  background: #2563eb;
+}
+
+.save-btn {
+  background: #22c55e;
+  color: white;
+}
+
+.save-btn:hover {
+  background: #16a34a;
+}
+
+.cancel-btn {
+  background: #ef4444;
+  color: white;
+}
+
+.cancel-btn:hover {
+  background: #dc2626;
 }
 
 /* Resumen financiero */
@@ -80,6 +173,12 @@
 .summary-item p {
   font-size: 1rem;
   color: #94a3b8;
+}
+
+.total-alumnos {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #3b82f6;
 }
 
 .ingresos-recibidos {

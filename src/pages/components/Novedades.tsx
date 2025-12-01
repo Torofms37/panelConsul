@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../../styles/novedades.css";
+import { SkeletonCard } from "./Skeleton";
 
 interface Novedad {
   id: number;
@@ -33,7 +34,18 @@ const initialNovedades: Novedad[] = [
 ];
 
 export const Novedades = () => {
-  const [novedades, setNovedades] = useState<Novedad[]>(initialNovedades);
+  const [novedades, setNovedades] = useState<Novedad[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Simular carga inicial
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setNovedades(initialNovedades);
+      setLoading(false);
+    }, 800); // Simula un pequeño delay de carga
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleToggleUrgencia = (id: number) => {
     setNovedades(
@@ -58,6 +70,28 @@ export const Novedades = () => {
   const novedadesNormales = novedades.filter(
     (novedad) => novedad.tipo === "normal"
   );
+
+  if (loading) {
+    return (
+      <div>
+        <div className="section-header">
+          <h2 className="section-title">
+            <span>📰</span>
+            Novedades
+          </h2>
+          <p className="section-subtitle">
+            Últimas actualizaciones y noticias del sistema
+          </p>
+        </div>
+
+        <div className="normal-container">
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>

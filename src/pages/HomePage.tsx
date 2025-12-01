@@ -7,22 +7,36 @@ import { Contaduria } from "./components/Contaduria";
 import { Cursos } from "./components/Cursos";
 import { useAuth } from "../hooks/useAuth";
 
-
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
-  const [activeSection, setActiveSection] = useState("novedades");
+  const [activeSection, setActiveSection] = useState(() => {
+    // Recuperar la sección activa guardada en localStorage, o usar "novedades" por defecto
+    return localStorage.getItem("activeSection") || "novedades";
+  });
   const [showModal, setShowModal] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   const { user } = useAuth();
 
   const confirmLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("activeSection"); // Limpiar también la sección activa
     navigate("/");
     console.log("Usuario ha cerrado sesión");
   };
 
   const handleNavClick = (section: string) => {
-    setActiveSection(section);
+    if (section === activeSection) return; // No hacer nada si ya estamos en esa sección
+
+    // Iniciar transición de salida
+    setIsTransitioning(true);
+
+    // Después de la animación de salida, cambiar la sección
+    setTimeout(() => {
+      setActiveSection(section);
+      localStorage.setItem("activeSection", section);
+      setIsTransitioning(false);
+    }, 300); // Duración de la animación de salida
   };
 
   const showLogoutModal = () => {
@@ -55,7 +69,9 @@ const HomePage: React.FC = () => {
 
         <nav className="sidebar-nav">
           <button
-            className={`nav-button ${activeSection === "novedades" ? "active" : ""}`}
+            className={`nav-button ${
+              activeSection === "novedades" ? "active" : ""
+            }`}
             onClick={() => handleNavClick("novedades")}
           >
             <span className="nav-icon">📰</span>
@@ -63,7 +79,9 @@ const HomePage: React.FC = () => {
           </button>
 
           <button
-            className={`nav-button ${activeSection === "calendario" ? "active" : ""}`}
+            className={`nav-button ${
+              activeSection === "calendario" ? "active" : ""
+            }`}
             onClick={() => handleNavClick("calendario")}
           >
             <span className="nav-icon">📅</span>
@@ -71,7 +89,9 @@ const HomePage: React.FC = () => {
           </button>
 
           <button
-            className={`nav-button ${activeSection === "contaduria" ? "active" : ""}`}
+            className={`nav-button ${
+              activeSection === "contaduria" ? "active" : ""
+            }`}
             onClick={() => handleNavClick("contaduria")}
           >
             <span className="nav-icon">💰</span>
@@ -79,7 +99,9 @@ const HomePage: React.FC = () => {
           </button>
 
           <button
-            className={`nav-button ${activeSection === "cursos" ? "active" : ""}`}
+            className={`nav-button ${
+              activeSection === "cursos" ? "active" : ""
+            }`}
             onClick={() => handleNavClick("cursos")}
           >
             <span className="nav-icon">📊</span>
@@ -95,10 +117,19 @@ const HomePage: React.FC = () => {
       </div>
 
       <div className="main-content">
-        {activeSection === "novedades" && <Novedades />}
-        {activeSection === "calendario" && <Calendario />}
-        {activeSection === "contaduria" && <Contaduria />}
-        {activeSection === "cursos" && <Cursos />}
+        <div
+          className={`page-transition ${
+            isTransitioning ? "fade-out" : "fade-in"
+          }`}
+          key={activeSection}
+        >
+          {activeSection === "novedades" && <Novedades />}
+          {activeSection === "calendario" && <Calendario />}
+          {activeSection === "contaduria" && <Contaduria />}
+          {activeSection === "cursos" && (
+            <Cursos onNavigateToCalendar={() => handleNavClick("calendario")} />
+          )}
+        </div>
       </div>
 
       {showModal && (
@@ -107,7 +138,8 @@ const HomePage: React.FC = () => {
             <div className="modal-icon">⚠️</div>
             <h3 className="modal-title">Confirmar Cierre de Sesión</h3>
             <p className="modal-text">
-              ¿Estás seguro de que deseas cerrar sesión? Perderás cualquier trabajo no guardado.
+              ¿Estás seguro de que deseas cerrar sesión? Perderás cualquier
+              trabajo no guardado.
             </p>
             <div className="modal-buttons">
               <button

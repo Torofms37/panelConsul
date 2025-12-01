@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios, { AxiosError } from "axios";
 import "../../styles/calendario.css";
 import { useAuth } from "../../hooks/useAuth";
+import { SkeletonGroup } from "./Skeleton";
 
 // --- Interfaces de Datos ---
 interface Alumno {
@@ -15,34 +16,45 @@ interface NuevoAlumnoData {
   dineroEntregado: number;
 }
 
+interface Course {
+  _id: string;
+  name: string;
+  isAvailable: boolean;
+}
+
 interface Grupo {
   _id: string;
   name: string;
   teacherName: string;
   fechaInicio: string;
   fechaTermino: string;
+  courseCost?: number;
   students: Alumno[];
+  course?: Course;
 }
 
 // --- Componente Principal ---
 export const Calendario = () => {
   const { user } = useAuth();
-  const [grupos, setGrupos] = useState<Grupo[]>([]); // Se usa para listar los grupos
+  const [grupos, setGrupos] = useState<Grupo[]>([]);
   const [modoCreacion, setModoCreacion] = useState(false);
   const [editingGroup, setEditingGroup] = useState<Grupo | null>(null);
+  const [availableCourses, setAvailableCourses] = useState<Course[]>([]);
 
   // Estado inicial del nuevo grupo
   const [nuevoGrupo, setNuevoGrupo] = useState<{
-    name: string;
+    courseId: string;
     teacherName: string;
     fechaInicio: string;
     fechaTermino: string;
+    courseCost: number;
     students: NuevoAlumnoData[];
   }>({
-    name: "",
+    courseId: "",
     teacherName: user.name || "",
     fechaInicio: "",
     fechaTermino: "",
+    courseCost: 1000,
     students: [],
   });
 
@@ -54,7 +66,22 @@ export const Calendario = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // [Se asumen los otros estados y funciones auxiliares (modales, etc.)]
+  // Estados para edición de alumnos temporales
+  const [editingTempStudent, setEditingTempStudent] = useState<number | null>(
+    null
+  );
+  const [tempEditValues, setTempEditValues] = useState<NuevoAlumnoData>({
+    nombre: "",
+    dineroEntregado: 0,
+  });
+
+  // Estados para agregar alumno a grupo existente
+  const [addingStudentToGroup, setAddingStudentToGroup] = useState<
+    string | null
+  >(null);
+  const [newStudentForGroup, setNewStudentForGroup] = useState<NuevoAlumnoData>(
+    { nombre: "", dineroEntregado: 0 }
+  );
 
   // Función auxiliar para configurar la autorización con JWT
   const getAuthConfig = () => {
@@ -76,6 +103,28 @@ export const Calendario = () => {
     }
   }, [user.name]);
 
+  // --- Cargar Cursos Disponibles ---
+  useEffect(() => {
+    const fetchAvailableCourses = async () => {
+      const config = getAuthConfig();
+      if (!config) return;
+
+      try {
+        const response = await axios.get(
+          "http://localhost:5000/api/courses/available",
+          config
+        );
+        setAvailableCourses(response.data);
+      } catch (err) {
+        console.error("Error al cargar cursos disponibles:", err);
+      }
+    };
+
+    if (modoCreacion) {
+      fetchAvailableCourses();
+    }
+  }, [modoCreacion]);
+
   // --- Carga Inicial de Grupos (API GET) ---
   useEffect(() => {
     const fetchGroups = async () => {
@@ -89,7 +138,6 @@ export const Calendario = () => {
           "http://localhost:5000/api/groups",
           config
         );
-        // Mapeo seguro de los datos recibidos
         setGrupos(
           response.data.map((g: any) => ({
             _id: g._id,
@@ -97,14 +145,20 @@ export const Calendario = () => {
             teacherName: g.teacherName || user.name,
             fechaInicio: g.fechaInicio,
             fechaTermino: g.fechaTermino,
-            students: g.students || [],
+            courseCost: g.courseCost || 1000,
+            course: g.course,
+            students:
+              g.students.map((s: any) => ({
+                id: s._id,
+                nombre: s.fullName,
+                dineroEntregado: s.moneyProvided,
+              })) || [],
           }))
         );
       } catch (err) {
         const error = err as AxiosError<{ message: string }>;
         setError(
-          error.response?.data?.message ||
-            "Error al obtener los grupos. (Verifique el servidor)"
+          error.response?.data?.message || "Error al obtener los grupos."
         );
       } finally {
         setLoading(false);
@@ -127,62 +181,39 @@ export const Calendario = () => {
     setNuevoAlumno({ nombre: "", dineroEntregado: 0 });
   };
 
-  const handleUpdateGroup = async (
-    groupId: string,
-    updatedFields: Partial<Grupo>
-  ) => {
-    setLoading(true);
-    const config = getAuthConfig();
-    if (!config) {
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const response = await axios.put(
-        `http://localhost:5000/api/groups/${groupId}`,
-        updatedFields,
-        config
-      );
-
-      // Actualiza el estado local de grupos con el grupo recién modificado
-      setGrupos((prev) =>
-        prev.map((g) => (g._id === groupId ? response.data.group : g))
-      );
-
-      setError(null);
-      alert(`Grupo '${response.data.group.name}' actualizado.`);
-    } catch (err) {
-      const error = err as AxiosError<{ message: string }>;
-      setError(
-        error.response?.data?.message || "Error al actualizar el grupo."
-      );
-    } finally {
-      setLoading(false);
-    }
+  // Editar alumno temporal
+  const handleEditTempStudent = (index: number) => {
+    setEditingTempStudent(index);
+    setTempEditValues(nuevoGrupo.students[index]);
   };
 
+  const handleSaveTempStudent = (index: number) => {
+    setNuevoGrupo((prev) => ({
+      ...prev,
+      students: prev.students.map((s, i) => (i === index ? tempEditValues : s)),
+    }));
+    setEditingTempStudent(null);
+  };
+
+  const handleDeleteTempStudent = (index: number) => {
+    setNuevoGrupo((prev) => ({
+      ...prev,
+      students: prev.students.filter((_, i) => i !== index),
+    }));
+  };
+
+  // Eliminar grupo
   const handleDeleteGroup = async (groupId: string) => {
-    if (
-      !window.confirm(
-        "¿Estás seguro de que quieres eliminar este grupo y todos sus alumnos? Esta acción es irreversible."
-      )
-    ) {
+    if (!window.confirm("¿Estás seguro de que quieres eliminar este grupo?"))
       return;
-    }
 
     setLoading(true);
     const config = getAuthConfig();
-    if (!config) {
-      return;
-    }
+    if (!config) return;
 
     try {
       await axios.delete(`http://localhost:5000/api/groups/${groupId}`, config);
-
-      // Actualiza el estado local eliminando el grupo
       setGrupos((prev) => prev.filter((g) => g._id !== groupId));
-      setError(null);
       alert("Grupo eliminado exitosamente.");
     } catch (err) {
       const error = err as AxiosError<{ message: string }>;
@@ -192,71 +223,14 @@ export const Calendario = () => {
     }
   };
 
-  const handleAddAlumnoToExistingGroup = async (
-    groupId: string,
-    alumnoData: NuevoAlumnoData
-  ) => {
-    if (!alumnoData.nombre.trim()) {
-      alert("El nombre del alumno es obligatorio.");
-      return;
-    }
-
-    setLoading(true);
-    const config = getAuthConfig();
-    if (!config) {
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const response = await axios.post(
-        `http://localhost:5000/api/groups/${groupId}/students`,
-        alumnoData,
-        config
-      );
-
-      const newStudent = response.data.student;
-
-      setGrupos((prev) =>
-        prev.map((g) => {
-          if (g._id === groupId) {
-            const newAlumno: Alumno = {
-              id: newStudent._id,
-              nombre: newStudent.fullName,
-              dineroEntregado: newStudent.moneyProvided,
-            };
-            return { ...g, students: [...g.students, newAlumno] };
-          }
-          return g;
-        })
-      );
-
-      setError(null);
-      alert(`Alumno ${newStudent.fullName} añadido al grupo.`);
-    } catch (err) {
-      const error = err as AxiosError<{ message: string }>;
-      setError(error.response?.data?.message || "Error al añadir el alumno.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Función que carga el grupo en el estado de edición y abre el modal
+  // Abrir modal de edición
   const startEditGroup = (grupo: Grupo) => {
     setEditingGroup(grupo);
-    // Puedes usar un modal de React normal en lugar de alert()
   };
 
-  // Función para guardar los cambios (similar a handleGuardarGrupo, pero con PUT)
-  const handleSaveEdit = async () => {
-    if (
-      !editingGroup ||
-      !editingGroup.name.trim() ||
-      !editingGroup.fechaInicio
-    ) {
-      setError("Faltan campos obligatorios.");
-      return;
-    }
+  // Guardar cambios del grupo
+  const handleSaveGroupEdit = async () => {
+    if (!editingGroup) return;
 
     setLoading(true);
     const config = getAuthConfig();
@@ -265,19 +239,92 @@ export const Calendario = () => {
     try {
       const response = await axios.put(
         `http://localhost:5000/api/groups/${editingGroup._id}`,
-        editingGroup, // Enviamos el objeto con los cambios
+        {
+          name: editingGroup.name,
+          courseCost: editingGroup.courseCost,
+        },
         config
       );
 
-      // Actualizar el estado local con el grupo actualizado
       setGrupos((prev) =>
-        prev.map((g) => (g._id === editingGroup._id ? response.data.group : g))
+        prev.map((g) =>
+          g._id === editingGroup._id ? { ...g, ...response.data.group } : g
+        )
       );
 
-      setEditingGroup(null); // Cerrar modal
+      setEditingGroup(null);
+      alert("Grupo actualizado exitosamente.");
     } catch (err) {
       const error = err as AxiosError<{ message: string }>;
-      setError(error.response?.data?.message || "Error al guardar la edición.");
+      alert(error.response?.data?.message || "Error al actualizar el grupo.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Agregar alumno a grupo existente
+  const handleAddStudentToExistingGroup = async () => {
+    if (!addingStudentToGroup || !newStudentForGroup.nombre.trim()) {
+      alert("El nombre del alumno es obligatorio.");
+      return;
+    }
+
+    setLoading(true);
+    const config = getAuthConfig();
+    if (!config) return;
+
+    try {
+      const response = await axios.post(
+        `http://localhost:5000/api/groups/${addingStudentToGroup}/students`,
+        newStudentForGroup,
+        config
+      );
+
+      const newStudent = response.data.student;
+
+      setGrupos((prev) =>
+        prev.map((g) => {
+          if (g._id === addingStudentToGroup) {
+            return {
+              ...g,
+              students: [
+                ...g.students,
+                {
+                  id: newStudent._id,
+                  nombre: newStudent.fullName,
+                  dineroEntregado: newStudent.moneyProvided,
+                },
+              ],
+            };
+          }
+          return g;
+        })
+      );
+
+      if (editingGroup && editingGroup._id === addingStudentToGroup) {
+        setEditingGroup((prev) =>
+          prev
+            ? {
+                ...prev,
+                students: [
+                  ...prev.students,
+                  {
+                    id: newStudent._id,
+                    nombre: newStudent.fullName,
+                    dineroEntregado: newStudent.moneyProvided,
+                  },
+                ],
+              }
+            : null
+        );
+      }
+
+      setAddingStudentToGroup(null);
+      setNewStudentForGroup({ nombre: "", dineroEntregado: 0 });
+      alert("Alumno añadido exitosamente.");
+    } catch (err) {
+      const error = err as AxiosError<{ message: string }>;
+      alert(error.response?.data?.message || "Error al añadir el alumno.");
     } finally {
       setLoading(false);
     }
@@ -286,12 +333,12 @@ export const Calendario = () => {
   // Lógica para guardar el grupo en el backend
   const handleGuardarGrupo = async () => {
     if (
-      !nuevoGrupo.name.trim() ||
+      !nuevoGrupo.courseId ||
       !nuevoGrupo.fechaInicio ||
       !nuevoGrupo.fechaTermino
     ) {
       setError(
-        "El nombre, la fecha de inicio y la fecha de término del grupo son obligatorios."
+        "El curso, la fecha de inicio y la fecha de término son obligatorios."
       );
       return;
     }
@@ -301,8 +348,12 @@ export const Calendario = () => {
     if (!config) return;
 
     const dataToSend = {
-      ...nuevoGrupo,
+      courseId: nuevoGrupo.courseId,
       teacherName: user.name || nuevoGrupo.teacherName,
+      fechaInicio: nuevoGrupo.fechaInicio,
+      fechaTermino: nuevoGrupo.fechaTermino,
+      courseCost: nuevoGrupo.courseCost,
+      students: nuevoGrupo.students,
     };
 
     try {
@@ -311,16 +362,12 @@ export const Calendario = () => {
         dataToSend,
         config
       );
-
       setGrupos((prev) => [...prev, response.data.group]);
-
       handleCancelCreation();
+      alert("Grupo creado exitosamente.");
     } catch (err) {
       const error = err as AxiosError<{ message: string }>;
-      setError(
-        error.response?.data?.message ||
-          "Error al guardar el grupo. (Revise la consola del servidor)"
-      );
+      setError(error.response?.data?.message || "Error al guardar el grupo.");
     } finally {
       setLoading(false);
     }
@@ -329,42 +376,16 @@ export const Calendario = () => {
   const handleCancelCreation = () => {
     setModoCreacion(false);
     setNuevoGrupo({
-      name: "",
+      courseId: "",
       teacherName: user.name || "",
       fechaInicio: "",
       fechaTermino: "",
+      courseCost: 1000,
       students: [],
     });
     setNuevoAlumno({ nombre: "", dineroEntregado: 0 });
     setError(null);
   };
-
-  // --- Funciones CRUD Locales (Deberías tener estas en tu archivo original) ---
-  // NOTA: Se omiten las implementaciones completas de estas funciones
-  // (ej. handleDeleteGrupo) por ser muy largas y no estar relacionadas con la API.
-
-  // const handleDeleteGrupo = (grupo: Grupo) => {
-  //   /* Lógica de eliminación */
-  // };
-  // const executeDeleteGrupo = () => {
-  //   /* Lógica de eliminación final */
-  // };
-  // const handleEditGroupName = (grupoId: string, newName: string) => {
-  //   /* Lógica de edición local */
-  // };
-  // const handleEditAlumno = (alumnoId: string, updatedData: Partial<Alumno>) => {
-  //   /* Lógica de edición local */
-  // };
-  // const confirmDeleteAlumno = (alumno: Alumno) => {
-  //   /* Lógica de modal */
-  // };
-  // const executeDeleteAlumno = () => {
-  //   /* Lógica de eliminación final de alumno */
-  // };
-
-  // // Asumiendo que el resto de las funciones CRUD están definidas.
-  // const activeGrupo = grupos.find((g) => g._id === null); // Placeholder para evitar error de compilación
-  // // --------------------------------------------------------------------------
 
   // --- RENDERIZADO DEL COMPONENTE ---
   return (
@@ -383,16 +404,36 @@ export const Calendario = () => {
 
           <div className="form-grid">
             <div className="form-group">
-              <label>Nombre del Grupo</label>
-              <input
+              <label>Seleccionar Curso *</label>
+              <select
                 className="form-input-style"
-                type="text"
-                placeholder="Ej. Cuarto Semestre"
-                value={nuevoGrupo.name}
+                value={nuevoGrupo.courseId}
                 onChange={(e) =>
-                  setNuevoGrupo((prev) => ({ ...prev, name: e.target.value }))
+                  setNuevoGrupo((prev) => ({
+                    ...prev,
+                    courseId: e.target.value,
+                  }))
                 }
-              />
+              >
+                <option value="">-- Seleccione un curso --</option>
+                {availableCourses.map((course) => (
+                  <option key={course._id} value={course._id}>
+                    {course.name}
+                  </option>
+                ))}
+              </select>
+              {availableCourses.length === 0 && (
+                <p
+                  style={{
+                    color: "#f59e0b",
+                    fontSize: "0.875rem",
+                    marginTop: "0.5rem",
+                  }}
+                >
+                  ⚠️ No hay cursos disponibles. Todos los cursos están siendo
+                  utilizados.
+                </p>
+              )}
             </div>
             <div className="form-group">
               <label>Nombre del Maestro Asignado</label>
@@ -437,6 +478,21 @@ export const Calendario = () => {
                 }
               />
             </div>
+            <div className="form-group">
+              <label>Costo Total del Curso</label>
+              <input
+                className="form-input-style"
+                type="number"
+                placeholder="Ej. 1000"
+                value={nuevoGrupo.courseCost}
+                onChange={(e) =>
+                  setNuevoGrupo((prev) => ({
+                    ...prev,
+                    courseCost: parseInt(e.target.value, 10) || 0,
+                  }))
+                }
+              />
+            </div>
           </div>
 
           <h4 className="subsection-title">Añadir Alumnos al Grupo</h4>
@@ -467,17 +523,93 @@ export const Calendario = () => {
             </button>
           </form>
 
-          {/* Lista temporal de alumnos */}
+          {/* Lista temporal de alumnos con edición */}
           {nuevoGrupo.students.length > 0 && (
             <div className="temp-students-list">
               <h5>Alumnos a Registrar:</h5>
-              <ul>
-                {nuevoGrupo.students.map((student, index) => (
-                  <li key={index}>
-                    {student.nombre} - ${student.dineroEntregado}
-                  </li>
-                ))}
-              </ul>
+              <table className="temp-students-table">
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Dinero Entregado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {nuevoGrupo.students.map((student, index) => (
+                    <tr key={index}>
+                      <td>
+                        {editingTempStudent === index ? (
+                          <input
+                            type="text"
+                            value={tempEditValues.nombre}
+                            onChange={(e) =>
+                              setTempEditValues((prev) => ({
+                                ...prev,
+                                nombre: e.target.value,
+                              }))
+                            }
+                            className="edit-input-small"
+                          />
+                        ) : (
+                          student.nombre
+                        )}
+                      </td>
+                      <td>
+                        {editingTempStudent === index ? (
+                          <input
+                            type="number"
+                            value={tempEditValues.dineroEntregado}
+                            onChange={(e) =>
+                              setTempEditValues((prev) => ({
+                                ...prev,
+                                dineroEntregado:
+                                  parseInt(e.target.value, 10) || 0,
+                              }))
+                            }
+                            className="edit-input-small"
+                          />
+                        ) : (
+                          `$${student.dineroEntregado}`
+                        )}
+                      </td>
+                      <td>
+                        {editingTempStudent === index ? (
+                          <>
+                            <button
+                              className="save-btn-small"
+                              onClick={() => handleSaveTempStudent(index)}
+                            >
+                              ✓
+                            </button>
+                            <button
+                              className="cancel-btn-small"
+                              onClick={() => setEditingTempStudent(null)}
+                            >
+                              ✕
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              className="edit-btn-small"
+                              onClick={() => handleEditTempStudent(index)}
+                            >
+                              Editar
+                            </button>
+                            <button
+                              className="delete-btn-small"
+                              onClick={() => handleDeleteTempStudent(index)}
+                            >
+                              Eliminar
+                            </button>
+                          </>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
 
@@ -507,8 +639,14 @@ export const Calendario = () => {
             </button>
           </div>
 
-          {/* Mostrando la lista de grupos */}
-          {loading && <div className="loading-message">Cargando...</div>}
+          {loading && (
+            <div className="group-list-container">
+              <SkeletonGroup />
+              <SkeletonGroup />
+              <SkeletonGroup />
+              <SkeletonGroup />
+            </div>
+          )}
           {!loading && grupos.length === 0 ? (
             <div className="content-card empty-state">
               <p>No hay grupos creados todavía.</p>
@@ -521,15 +659,15 @@ export const Calendario = () => {
                   <h4>{grupo.name}</h4>
                   <p>Maestro: {grupo.teacherName}</p>
                   <p>Alumnos: {grupo.students.length}</p>
+                  <p>Costo: ${grupo.courseCost || 1000}</p>
                   <p>
                     Periodo: {grupo.fechaInicio} al {grupo.fechaTermino}
                   </p>
 
                   <div className="group-actions">
-                    {/* Aquí puedes llamar a una función para abrir un modal de edición */}
                     <button
                       className="edit-btn"
-                      onClick={() => startEditGroup(grupo)} // LLAMADA CORRECTA
+                      onClick={() => startEditGroup(grupo)}
                       disabled={loading}
                     >
                       Editar
@@ -546,6 +684,133 @@ export const Calendario = () => {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Modal de Edición de Grupo */}
+      {editingGroup && (
+        <div className="modal-overlay" onClick={() => setEditingGroup(null)}>
+          <div
+            className="modal-edit-group"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3>Editar Grupo: {editingGroup.name}</h3>
+
+            <div className="form-group">
+              <label>Nombre del Grupo</label>
+              <input
+                type="text"
+                value={editingGroup.name}
+                onChange={(e) =>
+                  setEditingGroup((prev) =>
+                    prev ? { ...prev, name: e.target.value } : null
+                  )
+                }
+                className="form-input-style"
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Costo Total del Curso</label>
+              <input
+                type="number"
+                value={editingGroup.courseCost || 1000}
+                onChange={(e) =>
+                  setEditingGroup((prev) =>
+                    prev
+                      ? {
+                          ...prev,
+                          courseCost: parseInt(e.target.value, 10) || 0,
+                        }
+                      : null
+                  )
+                }
+                className="form-input-style"
+              />
+            </div>
+
+            <h4>Alumnos del Grupo</h4>
+            <table className="students-edit-table">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Dinero Entregado</th>
+                </tr>
+              </thead>
+              <tbody>
+                {editingGroup.students.map((student) => (
+                  <tr key={student.id}>
+                    <td>{student.nombre}</td>
+                    <td>${student.dineroEntregado}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {addingStudentToGroup === editingGroup._id ? (
+              <div className="add-student-form">
+                <input
+                  type="text"
+                  placeholder="Nombre del alumno"
+                  value={newStudentForGroup.nombre}
+                  onChange={(e) =>
+                    setNewStudentForGroup((prev) => ({
+                      ...prev,
+                      nombre: e.target.value,
+                    }))
+                  }
+                  className="form-input-style"
+                />
+                <input
+                  type="number"
+                  placeholder="Dinero entregado"
+                  value={newStudentForGroup.dineroEntregado || ""}
+                  onChange={(e) =>
+                    setNewStudentForGroup((prev) => ({
+                      ...prev,
+                      dineroEntregado: parseInt(e.target.value, 10) || 0,
+                    }))
+                  }
+                  className="form-input-style"
+                />
+                <button
+                  className="save-btn"
+                  onClick={handleAddStudentToExistingGroup}
+                >
+                  Guardar Alumno
+                </button>
+                <button
+                  className="cancel-btn"
+                  onClick={() => setAddingStudentToGroup(null)}
+                >
+                  Cancelar
+                </button>
+              </div>
+            ) : (
+              <button
+                className="add-student-btn"
+                onClick={() => setAddingStudentToGroup(editingGroup._id)}
+              >
+                + Agregar Alumno
+              </button>
+            )}
+
+            <div className="modal-actions">
+              <button
+                className="cancel-btn"
+                onClick={() => setEditingGroup(null)}
+              >
+                Cerrar
+              </button>
+              <button
+                className="save-btn"
+                onClick={handleSaveGroupEdit}
+                disabled={loading}
+              >
+                {loading ? "Guardando..." : "Guardar Cambios"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

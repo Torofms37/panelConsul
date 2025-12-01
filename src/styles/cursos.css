@@ -2,13 +2,18 @@
  * Archivo de estilos para el componente Cursos
  */
 
+/* Contenedor principal */
+.cursos-container {
+  width: 100%;
+}
+
 .groups-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 25px;
   margin-top: 20px;
-  justify-content: start; /* Asegura que la cuadrícula se alinee a la izquierda */
-  width: 100%; /* Ocupa todo el ancho del contenedor padre */
+  justify-content: start;
+  width: 100%;
 }
 
 .group-card {
@@ -20,9 +25,9 @@
   transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
-  text-align: left; /* Alineación del texto a la izquierda */
-  align-items: flex-start; /* Alinea los elementos hijos al inicio (izquierda) */
-  width: 100%; /* Las tarjetas ocupan el 100% de su celda en la cuadrícula */
+  text-align: left;
+  align-items: flex-start;
+  width: 100%;
 }
 
 .group-card:hover {

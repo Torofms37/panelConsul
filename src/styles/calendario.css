@@ -38,6 +38,7 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 12px;
   padding: 2rem;
+  width: 100%;
 }
 
 .card-title {
@@ -213,65 +214,509 @@
 }
 
 .form-input-style {
-    background-color: #334155;
-    border: 1px solid #475569;
-    border-radius: 8px;
-    padding: 12px;
-    color: #f1f5f9;
-    font-size: 1rem;
-    width: 100%;
+  background-color: #334155;
+  border: 1px solid #475569;
+  border-radius: 8px;
+  padding: 12px;
+  color: #f1f5f9;
+  font-size: 1rem;
+  width: 100%;
 }
 
 .form-input-style::placeholder {
-    color: #94a3b8;
+  color: #94a3b8;
 }
 
 .form-input-style:focus {
-    outline: none;
-    border-color: #3b82f6;
+  outline: none;
+  border-color: #3b82f6;
 }
 
 /* Grid para el formulario de creación de grupo */
 .form-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 /* Asegurar que los inputs dentro de form-group también tengan buen estilo */
 .form-group input {
-    width: 100%;
-    background-color: #334155;
-    border: 1px solid #475569;
-    border-radius: 8px;
-    padding: 12px;
-    color: #f1f5f9;
-    font-size: 1rem;
+  width: 100%;
+  background-color: #334155;
+  border: 1px solid #475569;
+  border-radius: 8px;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.add-group-btn {
+  background-color: #3b82f6;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.add-group-btn:hover {
+  background-color: #2563eb;
+  transform: translateY(-2px);
+}
+
+.group-list-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.group-item-card {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  padding: 1.5rem;
+  transition: transform 0.3s;
+}
+
+.group-item-card:hover {
+  transform: translateY(-5px);
+  border-color: #3b82f6;
+}
+
+.group-item-card h4 {
+  color: #fff;
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.group-item-card p {
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  color: #94a3b8;
+}
+
+/* === VISTA DE CREACIÓN DE GRUPO === */
+.creation-mode {
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.form-group {
+  margin-bottom: 10px;
+}
+
+.form-group label {
+  display: block;
+  color: #e2e8f0;
+  margin-bottom: 0.5rem;
+}
+
+.form-group input {
+  width: 100%;
+  background-color: #334155;
+  border: 1px solid #475569;
+  border-radius: 8px;
+  padding: 12px;
+  color: #f1f5f9;
+  font-size: 1rem;
+}
+
+.subsection-title {
+  color: #cbd5e1;
+  font-size: 1.2rem;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  border-top: 1px solid #334155;
+  padding-top: 1.5rem;
+}
+
+.add-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  align-items: center;
+}
+
+.add-btn {
+  background-color: #22c55e;
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
 }
 
 .temp-students-list {
-    margin-top: 1.5rem;
-    padding: 1rem;
-    background: rgba(0,0,0,0.2);
-    border-radius: 8px;
-    color: #cbd5e1;
+  margin-top: 1rem;
+  color: #94a3b8;
 }
 
 .temp-students-list h5 {
-    color: #fff;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
+  color: #fff;
+  font-weight: 600;
 }
 
 .temp-students-list ul {
-    list-style-type: none;
-    padding-left: 0;
+  list-style-type: disc;
+  padding-left: 20px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+  border-top: 1px solid #334155;
+  padding-top: 1.5rem;
+}
+
+.cancel-btn {
+  background-color: #475569;
+  color: #e2e8f0;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.save-group-btn {
+  background-color: #3b82f6;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.form-input-style {
+  background-color: #334155;
+  border: 1px solid #475569;
+  border-radius: 8px;
+  padding: 12px;
+  color: #f1f5f9;
+  font-size: 1rem;
+  width: 100%;
+}
+
+.form-input-style::placeholder {
+  color: #94a3b8;
+}
+
+.form-input-style:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+/* Grid para el formulario de creación de grupo */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+/* Asegurar que los inputs dentro de form-group también tengan buen estilo */
+.form-group input {
+  width: 100%;
+  background-color: #334155;
+  border: 1px solid #475569;
+  border-radius: 8px;
+  padding: 12px;
+  color: #f1f5f9;
+  font-size: 1rem;
+}
+
+.temp-students-list {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  color: #cbd5e1;
+}
+
+.temp-students-list h5 {
+  color: #fff;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+/* Tabla de alumnos temporales */
+.temp-students-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.temp-students-table th,
+.temp-students-table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #334155;
+}
+
+.temp-students-table th {
+  background-color: #1e293b;
+  color: #e2e8f0;
+  font-weight: 600;
+}
+
+.temp-students-table td {
+  color: #cbd5e1;
+}
+
+/* Inputs pequeños para edición */
+.edit-input-small {
+  background: #1e293b;
+  border: 1px solid #475569;
+  border-radius: 4px;
+  padding: 6px 10px;
+  color: #f1f5f9;
+  font-size: 0.9rem;
+  width: 100%;
+}
+
+.edit-input-small:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+/* Botones pequeños */
+.edit-btn-small,
+.delete-btn-small,
+.save-btn-small,
+.cancel-btn-small {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.85rem;
+  margin-right: 8px;
+  transition: all 0.2s ease;
+}
+
+.edit-btn-small {
+  background: #3b82f6;
+  color: white;
+}
+
+.edit-btn-small:hover {
+  background: #2563eb;
+}
+
+.delete-btn-small {
+  background: #ef4444;
+  color: white;
+}
+
+.delete-btn-small:hover {
+  background: #dc2626;
+}
+
+.save-btn-small {
+  background: #22c55e;
+  color: white;
+}
+
+.save-btn-small:hover {
+  background: #16a34a;
+}
+
+.cancel-btn-small {
+  background: #6b7280;
+  color: white;
+}
+
+.cancel-btn-small:hover {
+  background: #4b5563;
+}
+
+/* Modal de edición */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-edit-group {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  color: #f1f5f9;
+}
+
+.modal-edit-group h3 {
+  color: #fff;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+}
+
+.modal-edit-group h4 {
+  color: #cbd5e1;
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+}
+
+.students-edit-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+
+.students-edit-table th,
+.students-edit-table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #334155;
+}
+
+.students-edit-table th {
+  background-color: #0f172a;
+  color: #e2e8f0;
+  font-weight: 600;
+}
+
+.students-edit-table td {
+  color: #cbd5e1;
+}
+
+.add-student-btn {
+  background: #22c55e;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  margin-top: 1rem;
+  width: 100%;
+}
+
+.add-student-btn:hover {
+  background: #16a34a;
+}
+
+.add-student-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #334155;
+}
+
+.save-btn {
+  background: #3b82f6;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.save-btn:hover {
+  background: #2563eb;
+}
+
+.save-btn:disabled {
+  background: #475569;
+  cursor: not-allowed;
+}
+
+/* Botones de acciones de grupo */
+.group-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 1rem;
+}
+
+.edit-btn,
+.delete-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.edit-btn {
+  background: #3b82f6;
+  color: white;
+}
+
+.edit-btn:hover {
+  background: #2563eb;
+}
+
+.delete-btn {
+  background: #ef4444;
+  color: white;
+}
+
+.delete-btn:hover {
+  background: #dc2626;
+}
+
+.edit-btn:disabled,
+.delete-btn:disabled {
+  background: #475569;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.temp-students-list ul {
+  list-style-type: none;
+  padding-left: 0;
 }
 .temp-students-list li {
-    padding: 0.25rem 0;
-    border-bottom: 1px solid #334155;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid #334155;
 }
 .temp-students-list li:last-child {
-    border-bottom: none;
+  border-bottom: none;
 }
