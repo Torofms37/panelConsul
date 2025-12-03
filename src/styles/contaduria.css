@@ -8,6 +8,35 @@
 /* Sección de alumnos */
 .alumnos-list-section {
   flex: 3; /* Ocupa 3/4 del espacio */
+  min-width: 0; /* Permite que el contenedor se encoja y active el scroll interno */
+}
+
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 5px;
+}
+
+/* Scrollbar minimalista para la tabla */
+.table-container::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: rgba(30, 41, 59, 0.5);
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
 }
 
 /* Sección de resumen financiero */
@@ -30,6 +59,7 @@
 .alumnos-table td {
   padding: 16px;
   text-align: left;
+  text-align: center;
   border-bottom: 1px solid #334155;
   vertical-align: middle;
 }
@@ -39,7 +69,6 @@
   font-size: 0.9rem;
   font-weight: 600;
   color: #e2e8f0;
-  text-transform: uppercase;
   letter-spacing: 0.5px;
   position: sticky;
   top: 0;
@@ -53,7 +82,6 @@
 
 .alumnos-table tbody tr:hover {
   background-color: rgba(59, 130, 246, 0.1);
-  transform: scale(1.01);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
@@ -62,40 +90,162 @@
   font-size: 0.95rem;
 }
 
-/* Estilos de la nueva columna de pagos */
-.alumnos-table td:nth-child(4) {
+/* Estilos para edición */
+.edit-input {
+  width: 100px;
+  padding: 6px 10px;
+  background: #1e293b;
+  border: 1px solid #475569;
+  border-radius: 6px;
+  color: #f1f5f9;
+  font-size: 0.9rem;
+}
+
+.edit-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.edit-btn,
+.save-btn,
+.cancel-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
   font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.edit-btn {
+  background: #3b82f6;
+  color: white;
+}
+
+.edit-btn:hover {
+  background: #2563eb;
+}
+
+.save-btn {
+  background: #22c55e;
+  color: white;
+}
+
+.save-btn:hover {
+  background: #16a34a;
+}
+
+.cancel-btn {
+  background: #ef4444;
+  color: white;
+}
+
+.cancel-btn:hover {
+  background: #dc2626;
+}
+
+/* Resumen financiero */
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 0;
+  border-bottom: 1px solid #334155;
+}
+
+.summary-item:last-child {
+  border-bottom: none;
+}
+
+.summary-item p {
+  font-size: 1rem;
+  color: #94a3b8;
+}
+
+.total-alumnos {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #3b82f6;
+}
+
+.ingresos-recibidos {
+  font-size: 1.5rem;
+  font-weight: 700;
   color: #22c55e;
 }
 
-.payment-status {
-  display: inline-flex;
+.ingresos-pendientes {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ef4444;
+}
+
+/* Gráfica de pastel */
+.chart-container {
+  margin-top: 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column; /* Apila los elementos verticalmente */
+  align-items: center;
+}
+
+.chart-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #f1f5f9;
+  margin-bottom: 15px;
+}
+
+.pie-chart-wrapper {
+  width: 100%; /* La gráfica ocupará todo el ancho disponible */
+  display: flex;
+  justify-content: center;
+}
+
+.pie-chart {
+  width: 150px; /* La gráfica ahora es más grande */
+  height: 150px;
+  border-radius: 50%;
+}
+
+.chart-legend-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.legend-item {
+  display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-weight: 600;
-  font-size: 0.85rem;
-  white-space: nowrap;
-  line-height: 1;
+  font-size: 0.9rem;
+  color: #94a3b8;
 }
 
-.payment-status-paid {
-  background: rgba(34, 197, 94, 0.15);
-  color: #22c55e;
-  border: 1px solid rgba(34, 197, 94, 0.3);
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
 }
 
-.payment-status-unpaid {
-  background: rgba(239, 68, 68, 0.15);
-  color: #ef4444;
-  border: 1px solid rgba(239, 68, 68, 0.3);
+.green-dot {
+  background-color: #22c55e;
 }
 
-.payment-status-partial {
-  background: rgba(249, 115, 22, 0.15);
-  color: #f97316;
-  border: 1px solid rgba(249, 115, 22, 0.3);
+.orange-dot {
+  background-color: #f97316;
+}
+.alumnos-table td {
+  color: #cbd5e1;
+  font-size: 0.95rem;
 }
 
 /* Estilos para edición */
@@ -260,5 +410,22 @@
 @media (max-width: 1024px) {
   .contaduria-container {
     flex-direction: column;
+  }
+}
+
+/* Responsive Table for small screens */
+@media (max-width: 768px) {
+  .table-container {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    display: block;
+    padding-bottom: 10px; /* Space for scrollbar */
+  }
+
+  .alumnos-table {
+    width: 100%;
+    min-width: 800px; /* Ensure table has a minimum width to trigger scroll */
   }
 }

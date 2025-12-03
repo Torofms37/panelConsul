@@ -269,12 +269,7 @@ export const Contaduria = () => {
                           )}
                         </td>
                         <td>${falta}</td>
-                        <td
-                          className={`payment-status payment-status-${status}`}
-                        >
-                          {status === "paid" && "✔️ "}
-                          {status === "partial" && "🟡 "}
-                          {status === "unpaid" && "❌ "}
+                        <td>
                           <span>{getStatusText(status)}</span>
                         </td>
                         <td>

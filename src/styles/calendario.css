@@ -566,6 +566,7 @@
 }
 
 .modal-edit-group {
+  position: relative;
   background: #1e293b;
   border: 1px solid #334155;
   border-radius: 12px;
@@ -575,6 +576,7 @@
   max-height: 80vh;
   overflow-y: auto;
   color: #f1f5f9;
+  margin: auto;
 }
 
 .modal-edit-group h3 {
