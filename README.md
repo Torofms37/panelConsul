@@ -1,69 +1,59 @@
-# React + TypeScript + Vite
+# 📚 Página de Consultorio Académico
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 🌟 Descripción y Objetivo
 
-Currently, two official plugins are available:
+Esta plataforma web está diseñada para gestionar de manera eficiente y moderna las actividades del Consultorio Académico. Su objetivo principal es facilitar la administración de cursos, asistencia de alumnos, control de pagos, y la comunicación entre administradores y profesores. Ofrece una interfaz intuitiva, segura y visualmente atractiva para mejorar la experiencia educativa.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🛠️ Tecnologías Utilizadas
 
-## Expanding the ESLint configuration
+### Frontend
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- ⚛️ **React**: Biblioteca principal para la interfaz de usuario.
+- ⚡ **Vite**: Entorno de desarrollo rápido y ligero.
+- 📘 **TypeScript**: Superset de JavaScript para un código más robusto.
+- 🎨 **TailwindCSS**: Framework de CSS para un diseño moderno y responsivo.
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Backend
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+- 🟢 **Node.js**: Entorno de ejecución para el servidor.
+- 🚂 **Express**: Framework para manejar las rutas y la API.
+- 🍃 **MongoDB**: Base de datos NoSQL para almacenar usuarios, cursos y asistencias.
+- 🔐 **JWT (JSON Web Tokens)**: Para la autenticación segura de usuarios.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Herramientas y Extensiones
+
+- 📄 **jsPDF & autoTable**: Para la generación de reportes en PDF.
+- 🔔 **Axios**: Para las peticiones HTTP.
+- 🧹 **ESLint**: Para mantener la calidad del código.
+
+## 🚀 Comandos de Git
+
+### Clonar el Repositorio
+
+Para descargar el proyecto en tu máquina local:
+
+```bash
+git clone https://github.com/Torofms37/panelConsul.git
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Subir Cambios (Push)
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Para guardar tus cambios en el repositorio remoto:
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+git add .
+git commit -m "Descripción de tus cambios"
+git push
 ```
+
+### Actualizar Proyecto (Pull)
+
+Para descargar los últimos cambios hechos por otros colaboradores:
+
+```bash
+git pull
+```
+
+---
+
+Hecho por Torofms37 🐂
