@@ -44,7 +44,18 @@ const LoginPage: React.FC = () => {
 
       navigate("/home");
     } catch (err) {
-      const error = err as AxiosError<{ message: string }>;
+      const error = err as AxiosError<{
+        message: string;
+        needsApproval?: boolean;
+      }>;
+
+      if (error.response?.data?.needsApproval) {
+        setMessage(error.response.data.message);
+        setTimeout(() => {
+          navigate("/pending-approval");
+        }, 1500);
+        return;
+      }
 
       setMessage(
         error.response?.data?.message || "Error al conectar con el servidor."
@@ -136,7 +147,12 @@ const LoginPage: React.FC = () => {
       </div>
 
       <div className="footer">
-        <a href="#" className="footer-button">
+        <a
+          href="https://github.com/Torofms37"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="footer-button"
+        >
           ✨ Creado por Torofms37 🐂
         </a>
       </div>

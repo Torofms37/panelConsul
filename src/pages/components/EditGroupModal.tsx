@@ -360,7 +360,7 @@ export const EditGroupModal: React.FC<EditGroupModalProps> = ({
             <input
               type="number"
               placeholder="Dinero entregado"
-              value={newStudentForGroup.dineroEntregado || ""}
+              value={newStudentForGroup.dineroEntregado}
               onChange={(e) =>
                 setNewStudentForGroup((prev) => ({
                   ...prev,

@@ -28,7 +28,7 @@ const HomePage: React.FC = () => {
   const confirmLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("activeSection"); // Limpiar también la sección activa
-    navigate("/");
+    navigate("/login");
     console.log("Usuario ha cerrado sesión");
   };
 
@@ -60,6 +60,13 @@ const HomePage: React.FC = () => {
   const hideLogoutModal = () => {
     setShowModal(false);
   };
+
+  useEffect(() => {
+    document.body.classList.add("dashboard-body");
+    return () => {
+      document.body.classList.remove("dashboard-body");
+    };
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -391,93 +398,110 @@ const HomePage: React.FC = () => {
       {/* Admin Chat Modal */}
       {showChatModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+          <div className="relative bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-3xl w-full max-w-4xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-modal-slide-in">
+            {/* Glossy overlay */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
+
             {/* Header */}
-            <div className="p-6 border-b border-slate-700 bg-slate-800/50 flex justify-between items-center">
-              <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                <span>💬</span> Enviar Mensaje
+            <div className="p-6 border-b border-white/10 bg-white/5 flex justify-between items-center relative z-10">
+              <h3 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400 flex items-center gap-3">
+                <span>💬</span> Redactar Nuevo Mensaje
               </h3>
               <button
                 onClick={() => setShowChatModal(false)}
-                className="text-slate-400 hover:text-white transition-colors"
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-800/50 hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition-all duration-300"
               >
                 ✕
               </button>
             </div>
 
             {/* Body */}
-            <div className="p-6 space-y-4 overflow-y-auto">
-              {/* Recipient Selector */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-300">
-                  Destinatario
-                </label>
-                <select
-                  value={selectedRecipient}
-                  onChange={(e) => setSelectedRecipient(e.target.value)}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                >
-                  <option value="all_teachers">Todos los Profesores</option>
-                  <option value="all_admins">Todos los Administradores</option>
-                  <option disabled>──────────</option>
-                  {usersList.map((u) => (
-                    <option key={u._id} value={u._id}>
-                      {u.name} ({u.role === "admin" ? "Admin" : "Profesor"})
-                    </option>
-                  ))}
-                </select>
-              </div>
+            <div className="p-8 space-y-6 overflow-y-auto relative z-10">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Recipient Selector */}
+                <div className="space-y-4">
+                  <label className="text-sm font-semibold text-blue-300 uppercase tracking-wider ml-1">
+                    Destinatario
+                  </label>
+                  <div className="relative group">
+                    <select
+                      value={selectedRecipient}
+                      onChange={(e) => setSelectedRecipient(e.target.value)}
+                      className="w-full appearance-none bg-slate-950/50 border border-slate-700/50 rounded-lg text-lg text-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 outline-none transition-all cursor-pointer hover:bg-slate-900/80 shadow-inner"
+                    >
+                      <option value="all_teachers">Todos los Profesores</option>
+                      <option value="all_admins">
+                        Todos los Administradores
+                      </option>
+                      <option disabled>──────────</option>
+                      {usersList.map((u) => (
+                        <option key={u._id} value={u._id}>
+                          {u.name} ({u.role === "admin" ? "Admin" : "Profesor"})
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 group-hover:text-blue-400 transition-colors">
+                      ▼
+                    </div>
+                  </div>
+                </div>
 
-              {/* Title Input */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-300">
-                  Asunto
-                </label>
-                <input
-                  type="text"
-                  value={messageTitle}
-                  onChange={(e) => setMessageTitle(e.target.value)}
-                  placeholder="Título del mensaje..."
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder:text-slate-500"
-                />
+                {/* Title Input */}
+                <div className="space-y-4">
+                  <label className="text-sm font-semibold text-blue-300 uppercase tracking-wider ml-1">
+                    Asunto
+                  </label>
+                  <input
+                    type="text"
+                    value={messageTitle}
+                    onChange={(e) => setMessageTitle(e.target.value)}
+                    placeholder="Escribe un título breve y claro..."
+                    className="w-full bg-slate-950/50 border border-slate-700/50 rounded-lg px-6 py-5 text-xl text-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 outline-none transition-all placeholder:text-slate-600 shadow-inner"
+                  />
+                </div>
               </div>
 
               {/* Message Input */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-300">
-                  Mensaje
+              <div className="space-y-4 flex flex-col h-full">
+                <label className="text-sm font-semibold text-blue-300 uppercase tracking-wider ml-1">
+                  Cuerpo del Mensaje
                 </label>
-                <textarea
-                  value={messageText}
-                  onChange={(e) => setMessageText(e.target.value)}
-                  placeholder="Escribe tu mensaje aquí..."
-                  rows={5}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder:text-slate-500 resize-none"
-                />
+                <div className="relative">
+                  <textarea
+                    value={messageText}
+                    onChange={(e) => setMessageText(e.target.value)}
+                    placeholder="Escribe tu mensaje aquí..."
+                    rows={12}
+                    className="w-full bg-slate-950/50 border border-slate-700/50 rounded-2xl px-6 py-6 text-xl text-slate-200 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 outline-none transition-all placeholder:text-slate-600 resize-none leading-relaxed shadow-inner"
+                  />
+                  <div className="absolute bottom-6 right-6 text-sm text-slate-500 font-medium">
+                    {messageText.length} caracteres
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* Footer */}
-            <div className="p-6 border-t border-slate-700 bg-slate-800/50 flex justify-end gap-3">
+            <div className="h-10 flex justify-center border-t border-white/10 bg-white/5 flex justify-center gap-6 z-10">
               <button
                 onClick={() => setShowChatModal(false)}
-                className="px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors font-medium"
+                className="px-8 py-4 text-lg text-slate-400 hover:text-white hover:bg-white/5 rounded-2xl transition-all duration-300 font-medium"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleSendMessage}
                 disabled={sendingMessage || !messageTitle || !messageText}
-                className="px-6 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-600/50 disabled:cursor-not-allowed text-white rounded-lg font-bold shadow-lg shadow-blue-500/20 transition-all flex items-center gap-2"
+                className="px-12 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:from-slate-700 disabled:to-slate-800 disabled:cursor-not-allowed text-white rounded-2xl text-xl font-bold shadow-xl shadow-blue-500/20 hover:shadow-blue-500/40 hover:-translate-y-1 transition-all duration-300 flex items-center gap-4"
               >
                 {sendingMessage ? (
                   <>
-                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin" />
                     Enviando...
                   </>
                 ) : (
                   <>
-                    <span>📤</span> Enviar Mensaje
+                    <span className=" text-2xl">📤</span> Enviar Mensaje
                   </>
                 )}
               </button>

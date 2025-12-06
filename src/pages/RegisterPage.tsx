@@ -106,14 +106,13 @@ const RegisterPage: React.FC = () => {
         formData
       );
 
-      setMessage(response.data.message + " Redirigiendo a Iniciar Sesión...");
+      setMessage(response.data.message);
 
       setTimeout(() => {
-        navigate("/");
-      }, 2000);
+        navigate("/pending-approval");
+      }, 1500);
     } catch (err) {
-
-      const error = err as AxiosError<{ message: string }>; 
+      const error = err as AxiosError<{ message: string }>;
 
       setMessage(
         error.response?.data?.message || "Error al conectar con el servidor."

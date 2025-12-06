@@ -1,5 +1,7 @@
 import "dotenv/config";
 import express from "express";
+import { createServer } from "http";
+import { Server } from "socket.io";
 import mongoose from "mongoose";
 import cors from "cors";
 import bcrypt from "bcryptjs";
@@ -13,6 +15,33 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+const server = createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+  },
+});
+
+io.on("connection", (socket) => {
+  console.log("Nuevo cliente conectado:", socket.id);
+
+  socket.on("join", ({ userId, role }) => {
+    if (userId) {
+      socket.join(`user-${userId}`);
+      console.log(`Usuario ${userId} unido a sala personal`);
+    }
+    if (role) {
+      socket.join(`role-${role}`);
+      console.log(`Usuario ${userId} unido a sala de rol: ${role}`);
+    }
+    socket.join("all");
+  });
+
+  socket.on("disconnect", () => {
+    console.log("Cliente desconectado:", socket.id);
+  });
+});
 app.use(express.json());
 app.use(cors());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
@@ -57,6 +86,7 @@ const userSchema = new mongoose.Schema({
   role: { type: String, enum: ["admin", "teacher"], default: "teacher" },
   photoUrl: { type: String, default: "" },
   birthDate: { type: Date },
+  isApproved: { type: Boolean, default: false },
 });
 const User = mongoose.model("User", userSchema);
 
@@ -143,7 +173,7 @@ const createNotification = async (
   recipient = null
 ) => {
   try {
-    await Notification.create({
+    const notification = await Notification.create({
       type,
       title,
       message,
@@ -151,6 +181,18 @@ const createNotification = async (
       roleTarget,
       recipient,
     });
+
+    // Emitir evento de Socket.io
+    if (recipient) {
+      io.to(`user-${recipient}`).emit("newNotification", notification);
+    }
+    if (roleTarget) {
+      io.to(`role-${roleTarget}`).emit("newNotification", notification);
+    } else if (!recipient && !roleTarget) {
+      // Si no hay target específico, enviar a todos (o lógica 'general')
+      // Por ahora, asumimos que 'GENERAL' va a todos
+      io.to("all").emit("newNotification", notification);
+    }
   } catch (error) {
     console.error("Error creating notification:", error);
   }
@@ -267,6 +309,17 @@ app.post("/api/login", async (req, res) => {
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(400).json({ message: "Credenciales inválidas." });
+    }
+
+    // Verificar si la cuenta está aprobada
+    // Excepción: Permitir acceso a admins para que no haya bloqueo total si es el primero
+    // O asumimos que los admins se crean manualmente o seeds.
+    // Para simplificar: Si es admin, pasa. Si es teacher, requiere isApproved.
+    if (user.role !== "admin" && !user.isApproved) {
+      return res.status(403).json({
+        message: "Cuenta pendiente de aprobación.",
+        needsApproval: true,
+      });
     }
 
     // Payload incluye el ID, email y NAME
@@ -890,6 +943,11 @@ app.put(
       // Como no existe, asumimos que 'aprobar' simplemente borra la notificación
       // y confirma que el usuario se queda.
 
+      const userId = notification.data.userId;
+      if (userId) {
+        await User.findByIdAndUpdate(userId, { isApproved: true });
+      }
+
       // Borramos la notificación para todos (ya se resolvió)
       await Notification.findByIdAndDelete(req.params.id);
 
@@ -991,6 +1049,6 @@ app.post(
 
 // --- 3. Inicio del Servidor ---
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Servidor escuchando en el puerto ${PORT}`);
 });

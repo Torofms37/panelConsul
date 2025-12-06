@@ -247,8 +247,18 @@ export const Contaduria = () => {
                     );
                     const isEditing = editingStudent === alumno._id;
 
+                    const rowClass =
+                      status === "paid"
+                        ? "hover:!bg-emerald-900/40"
+                        : status === "partial"
+                        ? "hover:!bg-orange-900/40"
+                        : "hover:!bg-red-900/40";
+
                     return (
-                      <tr key={alumno._id}>
+                      <tr
+                        key={alumno._id}
+                        className={`${rowClass} transition-colors duration-200`}
+                      >
                         <td>{alumno._id.slice(-6)}</td>
                         <td>{alumno.fullName}</td>
                         <td>{grupo.name}</td>

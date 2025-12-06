@@ -9,12 +9,13 @@
   box-sizing: border-box;
 }
 
-body {
+body.dashboard-body {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   background: #0f172a;
   color: #e2e8f0;
   height: 100vh;
   overflow: hidden;
+  display: block; /* Override index.css flex */
 }
 
 /* -------------------- SIDEBAR -------------------- */
@@ -31,6 +32,7 @@ body {
   justify-content: space-between;
   z-index: 100;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
 }
 
 .sidebar.closed {
@@ -43,6 +45,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .sidebar-toggle-btn {
@@ -67,7 +70,7 @@ body {
 .sidebar-open-btn {
   position: fixed;
   top: 30px;
-  left: 20px;
+  left: 5px;
   z-index: 90;
   background: transparent;
   border: none;
@@ -95,16 +98,39 @@ body {
 }
 
 .sidebar-nav {
+  position: relative;
   flex: 1;
   padding: 20px 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 2px;
 }
 
 .nav-button {
-  width: 100%;
+  width: calc(100% - 20px);
+  margin: 5px 10px;
   background: transparent;
   border: none;
+  border-radius: 8px;
   color: #94a3b8;
-  padding: 18px 30px;
+  padding: 15px 20px;
   text-align: left;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -112,9 +138,13 @@ body {
   font-weight: 500;
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 12px;
   position: relative;
   overflow: hidden;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .nav-button::before {
@@ -132,7 +162,7 @@ body {
 .nav-button:hover {
   background: rgba(59, 130, 246, 0.1);
   color: #f1f5f9;
-  padding-left: 35px;
+  padding-left: 25px;
 }
 
 .nav-button:hover::before {
@@ -142,7 +172,7 @@ body {
 .nav-button.active {
   background: rgba(59, 130, 246, 0.15);
   color: #3b82f6;
-  padding-left: 35px;
+  padding-left: 25px;
 }
 
 .nav-button.active::before {
@@ -164,6 +194,7 @@ body {
 .sidebar-footer {
   padding: 20px;
   border-top: 1px solid #334155;
+  flex-shrink: 0;
 }
 
 .logout-btn {
@@ -221,7 +252,7 @@ body {
   overflow-y: auto;
   padding: 30px;
   display: flex;
-  flex-direction: column;
+  /* flex-direction: column; */
   position: relative;
   scroll-behavior: smooth;
   transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1),
@@ -266,10 +297,12 @@ body {
 
 .page-transition.fade-in {
   animation-name: fadeInUp;
+  background-color: none;
 }
 
 .page-transition.fade-out {
   animation-name: fadeOutDown;
+  background-color: none;
 }
 
 @keyframes fadeInUp {

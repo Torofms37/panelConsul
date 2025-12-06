@@ -44,17 +44,7 @@ export const Asistencia = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        // Inject mock group for testing
-        const mockGroup: Group = {
-          _id: "mock-test-1",
-          name: "Desarrollo Web Avanzado",
-          teacherName: "Roberto Gomez",
-          students: Array(25).fill(null),
-          alerts: 3,
-          news: 5,
-        };
-
-        setGroups([...response.data, mockGroup]);
+        setGroups([...response.data]);
       } catch (err) {
         console.error("Error loading groups:", err);
       }
@@ -227,7 +217,7 @@ export const Asistencia = () => {
   const selectedGroup = groups.find((g) => g._id === selectedGroupId);
 
   return (
-    <div className="w-full min-h-screen bg-slate-900/50 p-4 md:p-8">
+    <div className="w-full h-auto bg-slate-900/50 p-4 md:p-8">
       <div className="section-header mb-8">
         <h2 className="section-title text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">
           <span>📝</span> Asistencia y Actividades
@@ -252,29 +242,13 @@ export const Asistencia = () => {
               <div
                 key={group._id}
                 onClick={() => setSelectedGroupId(group._id)}
-                className="group relative overflow-hidden rounded-[1rem] bg-slate-800/20 border border-slate-700/30 hover:bg-slate-800/40 hover:border-blue-500/30 transition-all duration-500 hover:shadow-2xl hover:shadow-blue-500/10 cursor-pointer hover:-translate-y-2 flex flex-col"
+                className="group w-100 h-30  flex align-center justify-center relative rounded-[1rem] bg-slate-800/20 border border-slate-700/30 hover:bg-slate-800/40 hover:border-blue-500/30 transition-all duration-500 hover:shadow-2xl hover:shadow-blue-500/10 cursor-pointer hover:-translate-y-2 flex flex-col"
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 via-transparent to-purple-500/0 group-hover:from-blue-500/5 group-hover:to-purple-500/5 transition-all duration-500" />
 
-                {/* Notifications */}
-                <div className="absolute top-4 right-4 flex gap-2 z-20">
-                  {group.alerts && group.alerts > 0 && (
-                    <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-bold shadow-lg shadow-red-500/10 animate-pulse">
-                      <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-                      {group.alerts} Alertas
-                    </div>
-                  )}
-                  {group.news && group.news > 0 && (
-                    <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold shadow-lg shadow-blue-500/10">
-                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-                      {group.news} Novedades
-                    </div>
-                  )}
-                </div>
-
                 <div className="relative p-8 flex-1 flex flex-col">
                   {/* Header: Icon + Name */}
-                  <div className="flex items-start gap-5 mb-6">
+                  <div className="flex items-center gap-5 mb-6">
                     {/* Icon Container */}
                     <div className="relative shrink-0">
                       <div className="absolute inset-0 bg-blue-500/20 blur-lg rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -290,25 +264,22 @@ export const Asistencia = () => {
                     </h3>
                   </div>
 
-                  {/* Spacer to push content down */}
-                  <div className="flex-1" />
-
                   {/* Minimalist Stats - Justified */}
-                  <div className="flex items-center justify-between pt-6 border-t border-slate-700/30 mt-4 px-2">
-                    <div className="flex items-center gap-2 text-slate-400">
-                      <div className="w-8 h-8 rounded-full bg-slate-900/50 flex items-center justify-center text-sm border border-slate-700/50">
+                  <div className="h-full flex items-center justify-between pt-6 border-t border-slate-700/30 mt-4 px-2">
+                    <div className="flex items-center text-slate-400">
+                      <div className="w-8 h-8 rounded-xl flex items-center justify-center text-lg">
                         👨‍🏫
                       </div>
-                      <span className="text-sm font-medium truncate max-w-[120px]">
+                      <span className="text-xl font-extralight truncate max-w-[120px]">
                         {group.teacherName.split(" ")[0]}
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-2 text-slate-400">
-                      <span className="text-sm font-medium">
+                    <div className="flex items-center text-slate-400">
+                      <span className="text-xl font-extralight">
                         {group.students?.length || 0} alumnos
                       </span>
-                      <div className="w-8 h-8 rounded-full bg-slate-900/50 flex items-center justify-center text-sm border border-slate-700/50">
+                      <div className="w-8 h-8 rounded-full  flex items-center justify-center text-sm">
                         👥
                       </div>
                     </div>
@@ -346,7 +317,7 @@ export const Asistencia = () => {
             <SkeletonTable rows={5} columns={9} />
           ) : (
             <>
-              <div className="relative top-6 flex flex-col gap-6 p-6 md:p-8 bg-slate-900/50 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-700/50 overflow-hidden">
+              <div className="relative top-6 flex flex-col gap-6 p-6 md:p-8 bg-slate-900/50 backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-700/50">
                 {/* Decorative Background Elements */}
                 <div className="absolute top-0 right-0 -mt-20 -mr-20 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none "></div>
                 <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -386,7 +357,7 @@ export const Asistencia = () => {
                 </div>
 
                 {/* Table Section */}
-                <div className="relative z-10 overflow-hidden rounded-2xl border border-slate-700/50 bg-slate-800/20 mb-6">
+                <div className="relative z-10 rounded-2xl border border-slate-700/50 bg-slate-800/20 mb-6">
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm border-collapse">
                       <thead>

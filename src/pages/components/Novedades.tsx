@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useAuth } from "../../hooks/useAuth";
+import { io } from "socket.io-client";
 
 interface Notification {
   _id: string;
@@ -36,10 +37,21 @@ export const Novedades = () => {
 
   useEffect(() => {
     fetchNotifications();
-    // Poll for new notifications every 5 seconds to keep the list updated in real-time
-    const interval = setInterval(fetchNotifications, 5000);
-    return () => clearInterval(interval);
-  }, []);
+
+    const socket = io("http://localhost:5000");
+
+    if (user.id) {
+      socket.emit("join", { userId: user.id, role: user.role });
+    }
+
+    socket.on("newNotification", (newNotif: Notification) => {
+      setNotifications((prev) => [newNotif, ...prev]);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [user.id, user.role]);
 
   const handleDismiss = async (id: string) => {
     try {
@@ -139,7 +151,7 @@ export const Novedades = () => {
   };
 
   return (
-    <div className="w-full min-h-screen bg-slate-900/50 p-4 md:p-8">
+    <div className="w-full h-auto bg-slate-900/50 p-4 md:p-8">
       <div className="section-header mb-8">
         <h2 className="section-title text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">
           <span>🔔</span> Novedades
@@ -170,7 +182,7 @@ export const Novedades = () => {
           notifications.map((notif) => (
             <div
               key={notif._id}
-              className="group relative overflow-hidden bg-slate-800/40 border border-slate-700/50 rounded-2xl p-6 hover:bg-slate-800/60 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/5 hover:border-blue-500/30"
+              className="group relative bg-slate-800/40 border border-slate-700/50 rounded-2xl p-6 hover:bg-slate-800/60 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/5 hover:border-blue-500/30"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 

@@ -573,10 +573,31 @@
   padding: 2rem;
   max-width: 600px;
   width: 90%;
-  max-height: 80vh;
+  max-height: 90vh; /* Increased to allow it to go closer to bottom */
   overflow-y: auto;
   color: #f1f5f9;
   margin: auto;
+}
+
+/* Scrollbar styles reused from Contaduria */
+.modal-edit-group::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+.modal-edit-group::-webkit-scrollbar-track {
+  background: rgba(30, 41, 59, 0.5);
+  border-radius: 4px;
+}
+
+.modal-edit-group::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+.modal-edit-group::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
 }
 
 .modal-edit-group h3 {
