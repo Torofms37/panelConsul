@@ -11,6 +11,51 @@ export const LandingPage = () => {
     };
   }, []);
 
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+    const name = formData.get("name") as string;
+    const email = formData.get("email") as string;
+    const phone = formData.get("phone") as string;
+    const message = formData.get("message") as string;
+
+    if (!name || !email || !phone || !message) {
+      alert("Por favor, completa todos los campos.");
+      return;
+    }
+
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@(hotmail|gmail|outlook)\.com$/i;
+    if (!emailRegex.test(email)) {
+      alert(
+        "Por favor, ingresa un correo válido (@hotmail.com, @gmail.com, @outlook.com)."
+      );
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:5000/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name, email, phone, message }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert("¡Mensaje enviado con éxito!");
+        form.reset();
+      } else {
+        alert("Error al enviar el mensaje: " + data.message);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Error al conectar con el servidor.");
+    }
+  };
+
   return (
     <div className="smooth-scroll">
       <nav className="glass" id="navbar">
@@ -190,14 +235,14 @@ export const LandingPage = () => {
         </div>
       </section>
       <section id="maestros" className="w-full h-120">
-        <div className="max-w-7xl">
+        <div className="w-full flex flex-col items-center justify-center">
           <h2
             className="text-5xl font-bold text-center mb-16 gradient-text"
             style={{ marginBottom: "2rem", marginTop: "2rem" }}
           >
             Nuestro Equipo Docente
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
+          <div className="grid relative left-10 w-7/12 m-auto grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
             <div className="glass-light rounded-xl p-6 text-center card-hover">
               <div className="w-24 h-24 mb-4 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center text-4xl">
                 👨‍🏫
@@ -211,10 +256,11 @@ export const LandingPage = () => {
       </section>
       <section
         id="contacto"
-        className="flex items-center justify-center w-full h-150"
+        className="flex items-center justify-center w-full h-auto"
         style={{
           background:
             "linear-gradient(to bottom, rgba(88, 28, 135, 0.15), rgba(109, 40, 217, 0.15), rgba(88, 28, 135, 0.15))",
+          padding: "2rem",
         }}
       >
         <div className="w-full md:w-2/3 lg:w-1/2 h-full flex flex-col justify-center">
@@ -225,72 +271,84 @@ export const LandingPage = () => {
             💬 ¡Hablemos!
           </h2>
           <div className="flex flex-col">
-            <form id="contact-form" style={{ marginBottom: "2rem" }}>
+            <form
+              id="contact-form"
+              className="flex flex-col gap-4"
+              onSubmit={handleSubmit}
+            >
               <div>
                 <label
                   htmlFor="name"
-                  className="block text-sm font-medium mb-4"
+                  className="text-xl block text-sm font-medium mb-4"
                 >
                   Nombre Completo
                 </label>
                 <input
                   type="text"
+                  placeholder="Escribe tu nombre"
                   id="name"
                   name="name"
                   required
-                  className="w-full px-4 py-3 bg-black bg-opacity-50 border border-gray-700 rounded-lg focus:outline-none focus:border-purple-500 transition-colors"
+                  className="w-full h-10 px-4 py-3 bg-black bg-opacity-50 border border-gray-700 rounded-lg focus:outline-none focus:border-purple-500 transition-colors"
                 />
               </div>
-              <div>
-                <label htmlFor="email" className="text-sm font-medium mb-2">
+              <div className="relative">
+                <label
+                  htmlFor="email"
+                  className="text-xl block text-sm font-medium mb-6"
+                >
                   Email
                 </label>
                 <input
                   type="email"
                   id="email"
+                  placeholder="Escribe tu email"
                   name="email"
                   required
-                  className="w-full px-4 py-3 bg-black bg-opacity-50 border border-gray-700 rounded-lg focus:outline-none focus:border-purple-500 transition-colors"
+                  className="w-full h-10 px-4 py-3 bg-black bg-opacity-50 border border-gray-700 rounded-lg focus:outline-none focus:border-purple-500 transition-colors"
                 />
               </div>
               <div>
                 <label
                   htmlFor="phone"
-                  className="block text-sm font-medium mb-2"
+                  className="text-xl block text-sm font-medium mb-2"
                 >
                   Teléfono
                 </label>
                 <input
                   type="tel"
+                  placeholder="Escribe tu teléfono"
                   id="phone"
                   name="phone"
-                  className="w-full px-4 py-3 bg-black bg-opacity-50 border border-gray-700 rounded-lg focus:outline-none focus:border-purple-500 transition-colors"
+                  required
+                  className="w-full h-10 px-4 py-3 bg-black bg-opacity-50 border border-gray-700 rounded-lg focus:outline-none focus:border-purple-500 transition-colors"
                 />
               </div>
               <div>
                 <label
                   htmlFor="message"
-                  className="block text-sm font-medium mb-2"
+                  className="text-xl block text-sm font-medium mb-2"
                 >
                   Mensaje
                 </label>
                 <textarea
                   id="message"
                   name="message"
+                  placeholder="Escribe tu mensaje"
                   rows={4}
                   required
-                  className="w-full px-4 py-3 bg-black bg-opacity-50 border border-gray-700 rounded-lg focus:outline-none focus:border-purple-500 transition-colors resize-none"
+                  className="w-full h-auto px-4 py-3 bg-black bg-opacity-50 border border-gray-700 rounded-lg focus:outline-none focus:border-purple-500 transition-colors resize-none"
                 ></textarea>
               </div>
               <button
                 type="submit"
-                className="btn-primary w-full py-4 rounded-lg text-white font-medium text-lg"
+                className="btn-primary w-full h-10 rounded-lg text-white font-medium text-xl cursor-pointer"
               >
                 📧 Enviar Mensaje
               </button>
             </form>
             <div
-              className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center"
+              className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center border-t border-gray-700"
               style={{ marginTop: "2rem" }}
             >
               <div>
@@ -319,10 +377,10 @@ export const LandingPage = () => {
         </div>
       </section>
       <footer className="bg-black bg-opacity-50 py-10 px-6 mt-20">
-        <div className="max-w-7xl text-center">
+        <div className="relative w-full text-center flex h-10 flex-row items-center justify-evenly left-6">
           <p className="text-gray-400 mb-4">
             © 2024
-            <span id="footer-institution-name">Academia de Excelencia</span>.
+            <span id="footer-institution-name"> Academia de Excelencia</span>.
             Todos los derechos reservados.
           </p>
           <div className="flex justify-center gap-6 text-gray-400">

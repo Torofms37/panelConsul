@@ -10,6 +10,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
+import nodemailer from "nodemailer";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -298,6 +299,42 @@ app.post("/api/register", async (req, res) => {
   } catch (error) {
     console.error("Error en registro:", error);
     res.status(500).json({ error: "Error interno del servidor al registrar." });
+  }
+});
+
+// RUTA DE CONTACTO (LANDING PAGE)
+app.post("/api/contact", async (req, res) => {
+  try {
+    const { name, email, phone, message } = req.body;
+
+    // Configuración del transporter (usando variables de entorno o defaults)
+    // NOTA: Para Gmail, se necesita 'App Password' si tienes 2FA activado.
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER || "tu_correo@gmail.com", // REEMPLAZAR O USAR ENV
+        pass: process.env.EMAIL_PASS || "tu_contraseña_de_aplicacion", // REEMPLAZAR O USAR ENV
+      },
+    });
+
+    const mailOptions = {
+      from: `"${name}" <${email}>`, // Remitente (puede que Gmail lo sobrescriba con el usuario autenticado)
+      to: "elbicholas13@gmail.com",
+      subject: "Mensaje de la página de Consultorio Academico",
+      text: `Has recibido un nuevo mensaje de contacto:
+      
+Nombre: ${name}
+Email: ${email}
+Teléfono: ${phone}
+Mensaje:
+${message}`,
+    };
+
+    await transporter.sendMail(mailOptions);
+    res.status(200).json({ message: "Correo enviado exitosamente" });
+  } catch (error) {
+    console.error("Error enviando correo:", error);
+    res.status(500).json({ message: "Error al enviar el correo." });
   }
 });
 
